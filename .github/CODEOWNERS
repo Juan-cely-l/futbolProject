@@ -1,0 +1,13 @@
+# Default owners for the entire repo
+* @juan-cely-l
+
+# Backend changes
+src/main/ @juan-cely-l
+src/test/ @juan-cely-l
+pom.xml @juan-cely-l
+
+# Frontend changes
+frontend/ @juan-cely-l
+
+# CI / CD
+.github/ @juan-cely-l
