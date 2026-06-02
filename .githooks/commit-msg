@@ -13,10 +13,10 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 COMMIT_MSG_FILE=$1
-COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+COMMIT_MSG=$(sed -n '1p' "$COMMIT_MSG_FILE")
 
 PATTERN="^(feat|fix|docs|refactor|test|ci|style|chore|deps|wip|revert)(\(.+\))?: .{1,80}$"
-MERGE_PATTERN="^Merge branch"
+MERGE_PATTERN="^Merge (branch|pull request)"
 
 if echo "$COMMIT_MSG" | grep -qE "$MERGE_PATTERN"; then
     exit 0

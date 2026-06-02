@@ -37,16 +37,19 @@ if [ -d "frontend" ]; then
         npm install
     fi
 
-    if [ ! -f "eslint.config.js" ]; then
+    if ! npm ls --depth=0 eslint prettier >/dev/null 2>&1; then
         echo "   Installing ESLint + Prettier..."
         npm install --save-dev \
             eslint@9 \
             @eslint/js \
-            eslint-plugin-react@latest \
             eslint-plugin-react-hooks@latest \
+            eslint-plugin-react-refresh@latest \
+            globals@latest \
             prettier \
             eslint-config-prettier 2>/dev/null
+    fi
 
+    if [ ! -f "eslint.config.js" ]; then
         cat > eslint.config.js << 'ESLINT_EOF'
 import js from "@eslint/js";
 import reactPlugin from "eslint-plugin-react";

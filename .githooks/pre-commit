@@ -37,7 +37,7 @@ if echo "$STAGED_FRONTEND" | grep -q .; then
         echo ""
     fi
 
-    FIXMES=$(git diff --cached -U0 -- "$STAGED_FRONTEND" | grep '^+.*FIXME\|^+.*TODO' || true)
+    FIXMES=$(git diff --cached -U0 -- frontend/ | grep -E '^+.*(FIXME|TODO)' || true)
     if [ -n "$FIXMES" ]; then
         echo "${YELLOW}⚠  Reminder: FIXME/TODO markers in staged frontend files:${NC}"
         echo "$FIXMES" | while read -r line; do echo "   $line"; done
