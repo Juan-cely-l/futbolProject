@@ -5,7 +5,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn package -DskipTests -B
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S futbol && adduser -S futbol -G futbol
 WORKDIR /app
 COPY --from=build /build/target/*.jar app.jar
