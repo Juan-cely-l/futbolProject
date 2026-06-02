@@ -1,0 +1,7 @@
+target/
+.env
+.git
+.gitignore
+*.md
+frontend/
+src/test/

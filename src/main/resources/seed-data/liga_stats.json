@@ -1,0 +1,140 @@
+{
+  "temporada": "2025/2026",
+  "estado": "Finalizada",
+  "ligas": [
+    {
+      "liga_id": "ES_LALIGA",
+      "nombre": "LaLiga EA Sports",
+      "pais": "España",
+      "equipos": [
+        { "equipo_id": "FCB", "nombre": "FC Barcelona", "posicion_final": 1, "puntos": 94, "partidos_jugados": 38, "victorias": 31, "empates": 1, "derrotas": 6, "goles_favor": 95, "goles_contra": 36, "diferencia_goles": 59, "clasificacion": "Champions League" },
+        { "equipo_id": "RMA", "nombre": "Real Madrid", "posicion_final": 2, "puntos": 86, "partidos_jugados": 38, "victorias": 27, "empates": 5, "derrotas": 6, "goles_favor": 77, "goles_contra": 35, "diferencia_goles": 42, "clasificacion": "Champions League" },
+        { "equipo_id": "ATM", "nombre": "Atlético Madrid", "posicion_final": 3, "puntos": 76, "partidos_jugados": 38, "victorias": 22, "empates": 10, "derrotas": 6, "goles_favor": 65, "goles_contra": 31, "diferencia_goles": 34, "clasificacion": "Champions League" },
+        { "equipo_id": "ATH", "nombre": "Athletic Club", "posicion_final": 4, "puntos": 70, "partidos_jugados": 38, "victorias": 21, "empates": 7, "derrotas": 10, "goles_favor": 62, "goles_contra": 37, "diferencia_goles": 25, "clasificacion": "Champions League" },
+        { "equipo_id": "BET", "nombre": "Real Betis", "posicion_final": 5, "puntos": 64, "partidos_jugados": 38, "victorias": 18, "empates": 10, "derrotas": 10, "goles_favor": 59, "goles_contra": 43, "diferencia_goles": 16, "clasificacion": "Europa League" },
+        { "equipo_id": "VIL", "nombre": "Villarreal CF", "posicion_final": 6, "puntos": 60, "partidos_jugados": 38, "victorias": 17, "empates": 9, "derrotas": 12, "goles_favor": 56, "goles_contra": 47, "diferencia_goles": 9, "clasificacion": "Conference League" },
+        { "equipo_id": "RSO", "nombre": "Real Sociedad", "posicion_final": 7, "puntos": 57, "partidos_jugados": 38, "victorias": 16, "empates": 9, "derrotas": 13, "goles_favor": 48, "goles_contra": 42, "diferencia_goles": 6, "clasificacion": "Sin competición europea" },
+        { "equipo_id": "VAL", "nombre": "Valencia CF", "posicion_final": 8, "puntos": 54, "partidos_jugados": 38, "victorias": 15, "empates": 9, "derrotas": 14, "goles_favor": 44, "goles_contra": 46, "diferencia_goles": -2, "clasificacion": "Sin competición europea" },
+        { "equipo_id": "GIR", "nombre": "Girona FC", "posicion_final": 9, "puntos": 52, "partidos_jugados": 38, "victorias": 14, "empates": 10, "derrotas": 14, "goles_favor": 50, "goles_contra": 51, "diferencia_goles": -1, "clasificacion": "Sin competición europea" },
+        { "equipo_id": "SEV", "nombre": "Sevilla FC", "posicion_final": 10, "puntos": 49, "partidos_jugados": 38, "victorias": 13, "empates": 10, "derrotas": 15, "goles_favor": 42, "goles_contra": 48, "diferencia_goles": -6, "clasificacion": "Sin competición europea" }
+      ],
+      "estadisticas_jugadores": [
+        { "jugador_id": "RL09", "nombre": "Robert Lewandowski", "equipo_id": "FCB", "posicion": "Delantero", "goles": 22, "asistencias": 5, "partidos_jugados": 34, "rol": "Sublíder goleador" },
+        { "jugador_id": "YR11", "nombre": "Yamine Yamal", "equipo_id": "FCB", "posicion": "Extremo", "goles": 11, "asistencias": 14, "partidos_jugados": 35, "rol": "MVP Joven" },
+        { "jugador_id": "PR08", "nombre": "Pedri", "equipo_id": "FCB", "posicion": "Centrocampista", "goles": 6, "asistencias": 10, "partidos_jugados": 33, "rol": "Titular indiscutible" },
+        { "jugador_id": "GR09", "nombre": "Gavi", "equipo_id": "FCB", "posicion": "Centrocampista", "goles": 4, "asistencias": 7, "partidos_jugados": 31, "rol": "Titular" },
+        { "jugador_id": "JD05", "nombre": "Jules Koundé", "equipo_id": "FCB", "posicion": "Defensa", "goles": 2, "asistencias": 3, "partidos_jugados": 36, "rol": "Titular indiscutible" },
+        { "jugador_id": "TS01", "nombre": "Marc ter Stegen", "equipo_id": "FCB", "posicion": "Portero", "goles": 0, "asistencias": 1, "partidos_jugados": 37, "rol": "Capitán" },
+        { "jugador_id": "AR22", "nombre": "Antonio Rüdiger", "equipo_id": "RMA", "posicion": "Defensa", "goles": 3, "asistencias": 2, "partidos_jugados": 34, "rol": "Líder defensivo" },
+        { "jugador_id": "JB05", "nombre": "Jude Bellingham", "equipo_id": "RMA", "posicion": "Centrocampista", "goles": 15, "asistencias": 8, "partidos_jugados": 32, "rol": "MVP del equipo" },
+        { "jugador_id": "VV07", "nombre": "Vinicius Jr", "equipo_id": "RMA", "posicion": "Extremo", "goles": 18, "asistencias": 11, "partidos_jugados": 33, "rol": "Estrella ofensiva" },
+        { "jugador_id": "KM09", "nombre": "Kylian Mbappé", "equipo_id": "RMA", "posicion": "Delantero", "goles": 25, "asistencias": 7, "partidos_jugados": 35, "rol": "Pichichi de la Liga" },
+        { "jugador_id": "FC23", "nombre": "Federico Valverde", "equipo_id": "RMA", "posicion": "Centrocampista", "goles": 8, "asistencias": 6, "partidos_jugados": 36, "rol": "Titular indiscutible" },
+        { "jugador_id": "AG07", "nombre": "Antoine Griezmann", "equipo_id": "ATM", "posicion": "Delantero", "goles": 14, "asistencias": 9, "partidos_jugados": 35, "rol": "Referente ofensivo" },
+        { "jugador_id": "JM08", "nombre": "Julián Alvarez", "equipo_id": "ATM", "posicion": "Delantero", "goles": 12, "asistencias": 7, "partidos_jugados": 34, "rol": "Titular" },
+        { "jugador_id": "NO01", "nombre": "Jan Oblak", "equipo_id": "ATM", "posicion": "Portero", "goles": 0, "asistencias": 0, "partidos_jugados": 38, "rol": "Capitán" },
+        { "jugador_id": "NI04", "nombre": "Iñaki Williams", "equipo_id": "ATH", "posicion": "Delantero", "goles": 10, "asistencias": 8, "partidos_jugados": 36, "rol": "Titular" },
+        { "jugador_id": "NI10", "nombre": "Nico Williams", "equipo_id": "ATH", "posicion": "Extremo", "goles": 8, "asistencias": 12, "partidos_jugados": 33, "rol": "Estrella" }
+      ]
+    },
+    {
+      "liga_id": "ENG_PL",
+      "nombre": "Premier League",
+      "pais": "Inglaterra",
+      "equipos": [
+        { "equipo_id": "ARS", "nombre": "Arsenal FC", "posicion_final": 1, "puntos": 85, "partidos_jugados": 38, "victorias": 26, "empates": 7, "derrotas": 5, "goles_favor": 71, "goles_contra": 27, "diferencia_goles": 44, "clasificacion": "Champions League" },
+        { "equipo_id": "MCI", "nombre": "Manchester City", "posicion_final": 2, "puntos": 78, "partidos_jugados": 38, "victorias": 23, "empates": 9, "derrotas": 6, "goles_favor": 77, "goles_contra": 35, "diferencia_goles": 42, "clasificacion": "Champions League" },
+        { "equipo_id": "LIV", "nombre": "Liverpool FC", "posicion_final": 3, "puntos": 76, "partidos_jugados": 38, "victorias": 22, "empates": 10, "derrotas": 6, "goles_favor": 69, "goles_contra": 31, "diferencia_goles": 38, "clasificacion": "Champions League" },
+        { "equipo_id": "CHE", "nombre": "Chelsea FC", "posicion_final": 4, "puntos": 68, "partidos_jugados": 38, "victorias": 20, "empates": 8, "derrotas": 10, "goles_favor": 63, "goles_contra": 38, "diferencia_goles": 25, "clasificacion": "Champions League" },
+        { "equipo_id": "NEW", "nombre": "Newcastle United", "posicion_final": 5, "puntos": 65, "partidos_jugados": 38, "victorias": 19, "empates": 8, "derrotas": 11, "goles_favor": 58, "goles_contra": 40, "diferencia_goles": 18, "clasificacion": "Europa League" },
+        { "equipo_id": "TOT", "nombre": "Tottenham Hotspur", "posicion_final": 6, "puntos": 63, "partidos_jugados": 38, "victorias": 18, "empates": 9, "derrotas": 11, "goles_favor": 61, "goles_contra": 44, "diferencia_goles": 17, "clasificacion": "Conference League" },
+        { "equipo_id": "MUN", "nombre": "Manchester United", "posicion_final": 7, "puntos": 58, "partidos_jugados": 38, "victorias": 17, "empates": 7, "derrotas": 14, "goles_favor": 52, "goles_contra": 47, "diferencia_goles": 5, "clasificacion": "Sin competición europea" },
+        { "equipo_id": "AVL", "nombre": "Aston Villa", "posicion_final": 8, "puntos": 55, "partidos_jugados": 38, "victorias": 15, "empates": 10, "derrotas": 13, "goles_favor": 49, "goles_contra": 48, "diferencia_goles": 1, "clasificacion": "Sin competición europea" }
+      ],
+      "estadisticas_jugadores": [
+        { "jugador_id": "BS07", "nombre": "Bukayo Saka", "equipo_id": "ARS", "posicion": "Extremo", "goles": 16, "asistencias": 12, "partidos_jugados": 35, "rol": "Estrella del equipo" },
+        { "jugador_id": "MO08", "nombre": "Martin Ødegaard", "equipo_id": "ARS", "posicion": "Centrocampista", "goles": 9, "asistencias": 11, "partidos_jugados": 33, "rol": "Capitán" },
+        { "jugador_id": "WH41", "nombre": "Declan Rice", "equipo_id": "ARS", "posicion": "Centrocampista", "goles": 7, "asistencias": 6, "partidos_jugados": 36, "rol": "Pilar defensivo" },
+        { "jugador_id": "GS29", "nombre": "Gabriel Jesus", "equipo_id": "ARS", "posicion": "Delantero", "goles": 12, "asistencias": 6, "partidos_jugados": 30, "rol": "Titular" },
+        { "jugador_id": "EH09", "nombre": "Erling Haaland", "equipo_id": "MCI", "posicion": "Delantero", "goles": 28, "asistencias": 4, "partidos_jugados": 33, "rol": "Bota de Oro PL" },
+        { "jugador_id": "PH10", "nombre": "Phil Foden", "equipo_id": "MCI", "posicion": "Centrocampista", "goles": 13, "asistencias": 9, "partidos_jugados": 34, "rol": "MVP City" },
+        { "jugador_id": "RU08", "nombre": "Rodri", "equipo_id": "MCI", "posicion": "Centrocampista", "goles": 5, "asistencias": 7, "partidos_jugados": 31, "rol": "Balón de Oro" },
+        { "jugador_id": "MS11", "nombre": "Mohamed Salah", "equipo_id": "LIV", "posicion": "Extremo", "goles": 20, "asistencias": 13, "partidos_jugados": 36, "rol": "Leyenda del club" },
+        { "jugador_id": "VD04", "nombre": "Virgil van Dijk", "equipo_id": "LIV", "posicion": "Defensa", "goles": 4, "asistencias": 2, "partidos_jugados": 36, "rol": "Capitán" },
+        { "jugador_id": "CP11", "nombre": "Cole Palmer", "equipo_id": "CHE", "posicion": "Centrocampista", "goles": 17, "asistencias": 10, "partidos_jugados": 35, "rol": "Jugador revelación" }
+      ]
+    },
+    {
+      "liga_id": "GER_BL",
+      "nombre": "Bundesliga",
+      "pais": "Alemania",
+      "equipos": [
+        { "equipo_id": "FCB_GER", "nombre": "Bayern Múnich", "posicion_final": 1, "puntos": 89, "partidos_jugados": 34, "victorias": 28, "empates": 5, "derrotas": 1, "goles_favor": 122, "goles_contra": 36, "diferencia_goles": 86, "clasificacion": "Champions League" },
+        { "equipo_id": "BVB", "nombre": "Borussia Dortmund", "posicion_final": 2, "puntos": 73, "partidos_jugados": 34, "victorias": 22, "empates": 7, "derrotas": 5, "goles_favor": 70, "goles_contra": 34, "diferencia_goles": 36, "clasificacion": "Champions League" },
+        { "equipo_id": "RBL", "nombre": "RB Leipzig", "posicion_final": 3, "puntos": 68, "partidos_jugados": 34, "victorias": 20, "empates": 8, "derrotas": 6, "goles_favor": 65, "goles_contra": 32, "diferencia_goles": 33, "clasificacion": "Champions League" },
+        { "equipo_id": "B04", "nombre": "Bayer Leverkusen", "posicion_final": 4, "puntos": 66, "partidos_jugados": 34, "victorias": 19, "empates": 9, "derrotas": 6, "goles_favor": 62, "goles_contra": 31, "diferencia_goles": 31, "clasificacion": "Champions League" },
+        { "equipo_id": "VFB", "nombre": "VfB Stuttgart", "posicion_final": 5, "puntos": 58, "partidos_jugados": 34, "victorias": 17, "empates": 7, "derrotas": 10, "goles_favor": 55, "goles_contra": 43, "diferencia_goles": 12, "clasificacion": "Europa League" },
+        { "equipo_id": "SCF", "nombre": "SC Freiburg", "posicion_final": 6, "puntos": 54, "partidos_jugados": 34, "victorias": 15, "empates": 9, "derrotas": 10, "goles_favor": 47, "goles_contra": 41, "diferencia_goles": 6, "clasificacion": "Conference League" }
+      ],
+      "estadisticas_jugadores": [
+        { "jugador_id": "HK09", "nombre": "Harry Kane", "equipo_id": "FCB_GER", "posicion": "Delantero", "goles": 36, "asistencias": 9, "partidos_jugados": 32, "rol": "Torjägerkanone / Máximo Goleador" },
+        { "jugador_id": "JM08B", "nombre": "Jamal Musiala", "equipo_id": "FCB_GER", "posicion": "Centrocampista", "goles": 14, "asistencias": 11, "partidos_jugados": 33, "rol": "Estrella joven" },
+        { "jugador_id": "JK06", "nombre": "Joshua Kimmich", "equipo_id": "FCB_GER", "posicion": "Centrocampista", "goles": 3, "asistencias": 12, "partidos_jugados": 34, "rol": "Líder del mediocampo" },
+        { "jugador_id": "AK01", "nombre": "Alphonso Davies", "equipo_id": "FCB_GER", "posicion": "Defensa", "goles": 2, "asistencias": 8, "partidos_jugados": 30, "rol": "Titular" },
+        { "jugador_id": "SG22", "nombre": "Serhou Guirassy", "equipo_id": "BVB", "posicion": "Delantero", "goles": 18, "asistencias": 5, "partidos_jugados": 30, "rol": "Goleador del equipo" },
+        { "jugador_id": "JB10", "nombre": "Julian Brandt", "equipo_id": "BVB", "posicion": "Centrocampista", "goles": 8, "asistencias": 10, "partidos_jugados": 32, "rol": "Creador de juego" },
+        { "jugador_id": "FO09", "nombre": "Florian Wirtz", "equipo_id": "B04", "posicion": "Centrocampista", "goles": 10, "asistencias": 13, "partidos_jugados": 31, "rol": "MVP Bundesliga" },
+        { "jugador_id": "VS30", "nombre": "Victor Boniface", "equipo_id": "B04", "posicion": "Delantero", "goles": 14, "asistencias": 6, "partidos_jugados": 28, "rol": "Titular" }
+      ]
+    },
+    {
+      "liga_id": "IT_SERIEA",
+      "nombre": "Serie A Enilive",
+      "pais": "Italia",
+      "equipos": [
+        { "equipo_id": "INT", "nombre": "Inter de Milán", "posicion_final": 1, "puntos": 84, "partidos_jugados": 38, "victorias": 25, "empates": 9, "derrotas": 4, "goles_favor": 73, "goles_contra": 29, "clasificacion": "Champions League" },
+        { "equipo_id": "NAP", "nombre": "Napoli", "posicion_final": 2, "puntos": 76, "partidos_jugados": 38, "victorias": 22, "empates": 10, "derrotas": 6, "goles_favor": 65, "goles_contra": 31, "clasificacion": "Champions League" },
+        { "equipo_id": "ACM", "nombre": "AC Milan", "posicion_final": 3, "puntos": 72, "partidos_jugados": 38, "victorias": 21, "empates": 9, "derrotas": 8, "goles_favor": 61, "goles_contra": 35, "clasificacion": "Champions League" },
+        { "equipo_id": "JUV", "nombre": "Juventus", "posicion_final": 4, "puntos": 68, "partidos_jugados": 38, "victorias": 19, "empates": 11, "derrotas": 8, "goles_favor": 55, "goles_contra": 33, "diferencia_goles": 22, "clasificacion": "Champions League" },
+        { "equipo_id": "ROM", "nombre": "AS Roma", "posicion_final": 5, "puntos": 60, "partidos_jugados": 38, "victorias": 17, "empates": 9, "derrotas": 12, "goles_favor": 48, "goles_contra": 40, "diferencia_goles": 8, "clasificacion": "Europa League" },
+        { "equipo_id": "LAZ", "nombre": "Lazio", "posicion_final": 6, "puntos": 57, "partidos_jugados": 38, "victorias": 16, "empates": 9, "derrotas": 13, "goles_favor": 46, "goles_contra": 42, "diferencia_goles": 4, "clasificacion": "Conference League" },
+        { "equipo_id": "FIO", "nombre": "Fiorentina", "posicion_final": 7, "puntos": 54, "partidos_jugados": 38, "victorias": 15, "empates": 9, "derrotas": 14, "goles_favor": 42, "goles_contra": 43, "diferencia_goles": -1, "clasificacion": "Sin competición europea" },
+        { "equipo_id": "ATA", "nombre": "Atalanta", "posicion_final": 8, "puntos": 52, "partidos_jugados": 38, "victorias": 15, "empates": 7, "derrotas": 16, "goles_favor": 47, "goles_contra": 45, "diferencia_goles": 2, "clasificacion": "Sin competición europea" }
+      ],
+      "estadisticas_jugadores": [
+        { "jugador_id": "LM10", "nombre": "Lautaro Martínez", "equipo_id": "INT", "posicion": "Delantero", "goles": 17, "asistencias": 5, "partidos_jugados": 34, "rol": "Capocannoniere" },
+        { "jugador_id": "NH08", "nombre": "Nicolò Barella", "equipo_id": "INT", "posicion": "Centrocampista", "goles": 7, "asistencias": 9, "partidos_jugados": 35, "rol": "Motor del equipo" },
+        { "jugador_id": "AM23", "nombre": "Alessandro Bastoni", "equipo_id": "INT", "posicion": "Defensa", "goles": 3, "asistencias": 5, "partidos_jugados": 34, "rol": "Líder defensivo" },
+        { "jugador_id": "YK77", "nombre": "Khvicha Kvaratskhelia", "equipo_id": "NAP", "posicion": "Extremo", "goles": 12, "asistencias": 10, "partidos_jugados": 34, "rol": "Estrella" },
+        { "jugador_id": "VO09", "nombre": "Victor Osimhen", "equipo_id": "NAP", "posicion": "Delantero", "goles": 18, "asistencias": 4, "partidos_jugados": 30, "rol": "Goleador" },
+        { "jugador_id": "RL11", "nombre": "Rafael Leão", "equipo_id": "ACM", "posicion": "Extremo", "goles": 11, "asistencias": 8, "partidos_jugados": 33, "rol": "Estrella ofensiva" },
+        { "jugador_id": "DT09", "nombre": "Dušan Vlahović", "equipo_id": "JUV", "posicion": "Delantero", "goles": 14, "asistencias": 5, "partidos_jugados": 33, "rol": "Referente ofensivo" },
+        { "jugador_id": "FC10", "nombre": "Paulo Dybala", "equipo_id": "ROM", "posicion": "Delantero", "goles": 10, "asistencias": 7, "partidos_jugados": 28, "rol": "Joya del equipo" }
+      ]
+    },
+    {
+      "liga_id": "FR_LIGUE1",
+      "nombre": "Ligue 1 McDonald's",
+      "pais": "Francia",
+      "equipos": [
+        { "equipo_id": "PSG", "nombre": "Paris Saint-Germain", "posicion_final": 1, "puntos": 76, "partidos_jugados": 34, "victorias": 24, "empates": 4, "derrotas": 6, "goles_favor": 74, "goles_contra": 29, "diferencia_goles": 45, "clasificacion": "Champions League (Doblete con UCL)" },
+        { "equipo_id": "RCL", "nombre": "RC Lens", "posicion_final": 2, "puntos": 70, "partidos_jugados": 34, "victorias": 22, "empates": 4, "derrotas": 8, "goles_favor": 66, "goles_contra": 35, "diferencia_goles": 31, "clasificacion": "Champions League" },
+        { "equipo_id": "OM", "nombre": "Olympique de Marsella", "posicion_final": 3, "puntos": 65, "partidos_jugados": 34, "victorias": 20, "empates": 5, "derrotas": 9, "goles_favor": 58, "goles_contra": 36, "diferencia_goles": 22, "clasificacion": "Champions League" },
+        { "equipo_id": "OL", "nombre": "Olympique de Lyon", "posicion_final": 4, "puntos": 58, "partidos_jugados": 34, "victorias": 17, "empates": 7, "derrotas": 10, "goles_favor": 52, "goles_contra": 38, "diferencia_goles": 14, "clasificacion": "Europa League" },
+        { "equipo_id": "ASM", "nombre": "AS Monaco", "posicion_final": 5, "puntos": 55, "partidos_jugados": 34, "victorias": 16, "empates": 7, "derrotas": 11, "goles_favor": 50, "goles_contra": 40, "diferencia_goles": 10, "clasificacion": "Conference League" },
+        { "equipo_id": "NIC", "nombre": "OGC Nice", "posicion_final": 6, "puntos": 52, "partidos_jugados": 34, "victorias": 15, "empates": 7, "derrotas": 12, "goles_favor": 44, "goles_contra": 39, "diferencia_goles": 5, "clasificacion": "Sin competición europea" }
+      ],
+      "estadisticas_jugadores": [
+        { "jugador_id": "OD10", "nombre": "Ousmane Dembélé", "equipo_id": "PSG", "posicion": "Extremo", "goles": 19, "asistencias": 8, "partidos_jugados": 33, "rol": "Mejor jugador ofensivo" },
+        { "jugador_id": "BV05", "nombre": "Bradley Barcola", "equipo_id": "PSG", "posicion": "Extremo", "goles": 12, "asistencias": 9, "partidos_jugados": 34, "rol": "Revelación" },
+        { "jugador_id": "VM10", "nombre": "Vitinha", "equipo_id": "PSG", "posicion": "Centrocampista", "goles": 5, "asistencias": 8, "partidos_jugados": 35, "rol": "Pilar del mediocampo" },
+        { "jugador_id": "AM05", "nombre": "Achraf Hakimi", "equipo_id": "PSG", "posicion": "Defensa", "goles": 4, "asistencias": 7, "partidos_jugados": 33, "rol": "Carrilero ofensivo" },
+        { "jugador_id": "GF99", "nombre": "Gianluigi Donnarumma", "equipo_id": "PSG", "posicion": "Portero", "goles": 0, "asistencias": 0, "partidos_jugados": 34, "rol": "Mejor portero" },
+        { "jugador_id": "MM10", "nombre": "Mason Greenwood", "equipo_id": "OM", "posicion": "Delantero", "goles": 15, "asistencias": 6, "partidos_jugados": 32, "rol": "Goleador del equipo" },
+        { "jugador_id": "AM18", "nombre": "Alexandre Lacazette", "equipo_id": "OL", "posicion": "Delantero", "goles": 13, "asistencias": 5, "partidos_jugados": 31, "rol": "Capitán" },
+        { "jugador_id": "BSE21", "nombre": "Breel Embolo", "equipo_id": "ASM", "posicion": "Delantero", "goles": 11, "asistencias": 4, "partidos_jugados": 28, "rol": "Titular" },
+        { "jugador_id": "DG10", "nombre": "David Guion", "equipo_id": "RCL", "posicion": "Delantero", "goles": 16, "asistencias": 7, "partidos_jugados": 33, "rol": "Goleador del Lens" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pitch-900: #0A1A12;
+  --color-pitch-800: #0D1F16;
+  --color-pitch-700: #11291B;
+  --color-pitch-600: #163522;
+  --color-pitch-400: #2D5A3D;
+  --color-pitch-200: #4A7F5C;
+
+  --color-lime-500: #B8FF47;
+  --color-lime-400: #C8FF6A;
+  --color-lime-300: #D8FF8D;
+  --color-lime-200: #E8FFB0;
+
+  --color-surface: #0D1F16;
+  --color-surface-card: #11291B;
+  --color-surface-hover: #163522;
+  --color-surface-elevated: #1A3A26;
+  --color-border: #1E422E;
+  --color-border-light: #2D5A3D;
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  --color-gk: #F59E0B;
+  --color-def: #3B82F6;
+  --color-mid: #8B5CF6;
+  --color-fwd: #EF4444;
+
+  --color-success: #22C55E;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-stats: 'Oswald', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-skeleton {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 200ms ease-out both;
+}
+
+.animate-pulse-skeleton {
+  animation: pulse-skeleton 1.5s ease-in-out infinite;
+}
+
+.animate-toast-in {
+  animation: toast-in 300ms ease-out both;
+}
+
+.animate-toast-out {
+  animation: toast-out 300ms ease-in both;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }

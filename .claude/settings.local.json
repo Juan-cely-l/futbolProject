@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(mvn compile *)",
+      "Bash(mvn clean *)",
+      "Bash(mvn test *)",
+      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=dev)",
+      "Bash(echo \"PID: $!\")",
+      "Read(//tmp/**)"
+    ]
+  }
+}
