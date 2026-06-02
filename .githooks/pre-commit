@@ -30,7 +30,7 @@ FAILED=0
 # ── 1. Check for problematic patterns ──────────────────────────────────
 
 if echo "$STAGED_FRONTEND" | grep -q .; then
-    CONSOLE_LOGS=$(git diff --cached -U0 -- "$STAGED_FRONTEND" | grep '^+.*console\.log' || true)
+    CONSOLE_LOGS=$(git diff --cached -U0 -- frontend/ | grep '^+.*console\.log' || true)
     if [ -n "$CONSOLE_LOGS" ]; then
         echo "${YELLOW}⚠  Warning: console.log found in staged frontend files:${NC}"
         echo "$CONSOLE_LOGS" | while read -r line; do echo "   $line"; done
