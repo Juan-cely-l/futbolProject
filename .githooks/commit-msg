@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# Futbix Commit Message Hook
+# ==========================
+# Validates commit message format.
+# Format: <type>: <subject>
+# Types: feat, fix, docs, refactor, test, ci, style, chore, deps
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+PATTERN="^(feat|fix|docs|refactor|test|ci|style|chore|deps|wip|revert)(\(.+\))?: .{1,80}$"
+MERGE_PATTERN="^Merge branch"
+
+if echo "$COMMIT_MSG" | grep -qE "$MERGE_PATTERN"; then
+    exit 0
+fi
+
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+    echo ""
+    echo "${RED}✘ Invalid commit message format.${NC}"
+    echo ""
+    echo "Expected: ${GREEN}<type>: <subject>${NC}"
+    echo ""
+    echo "Valid types:"
+    echo "  feat     — New feature"
+    echo "  fix      — Bug fix"
+    echo "  docs     — Documentation"
+    echo "  refactor — Code refactoring"
+    echo "  test     — Tests"
+    echo "  ci       — CI/CD changes"
+    echo "  style    — Formatting, styling"
+    echo "  chore    — Maintenance"
+    echo "  deps     — Dependency updates"
+    echo ""
+    echo "Examples:"
+    echo "  feat: add player efficiency endpoint"
+    echo "  fix: handle null budget in TeamResponse"
+    echo "  deps(docker): upgrade postgres to 16-alpine"
+    echo ""
+    echo "Your message:"
+    echo "  $COMMIT_MSG"
+    exit 1
+fi

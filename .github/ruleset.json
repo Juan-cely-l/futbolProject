@@ -1,0 +1,156 @@
+{
+  "name": "futbix-ruleset",
+  "description": "Production-grade branch protection for main branch. Requires PR review, status checks, linear history, signed commits, and blocks force pushes.",
+  "rulesets": [
+    {
+      "name": "main",
+      "target": "branch",
+      "enforcement_level": "active",
+      "bypass_mode": "override",
+      "conditions": {
+        "ref_name": {
+          "include": [
+            "refs/heads/main"
+          ],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_linear_history"
+        },
+        {
+          "type": "required_signatures"
+        },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 1,
+            "dismiss_stale_reviews_on_push": true,
+            "require_code_owner_review": true,
+            "require_last_push_approval": true
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "required_status_checks": [
+              {
+                "context": "Backend",
+                "integration_id": 0
+              },
+              {
+                "context": "Frontend",
+                "integration_id": 0
+              },
+              {
+                "context": "Docker",
+                "integration_id": 0
+              }
+            ],
+            "strict_required_status_checks_policy": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "release-branches",
+      "target": "branch",
+      "enforcement_level": "active",
+      "conditions": {
+        "ref_name": {
+          "include": [
+            "refs/heads/release/*"
+          ],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_signatures"
+        },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 2,
+            "dismiss_stale_reviews_on_push": true,
+            "require_code_owner_review": true,
+            "require_last_push_approval": true
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "required_status_checks": [
+              {
+                "context": "Backend",
+                "integration_id": 0
+              },
+              {
+                "context": "Frontend",
+                "integration_id": 0
+              },
+              {
+                "context": "Docker",
+                "integration_id": 0
+              }
+            ],
+            "strict_required_status_checks_policy": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "tags",
+      "target": "tag",
+      "enforcement_level": "active",
+      "conditions": {
+        "ref_name": {
+          "include": [
+            "refs/tags/v*"
+          ],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_signatures"
+        }
+      ]
+    }
+  ],
+  "apply_instructions": [
+    "1. Go to https://github.com/juan-cely-l/futbolProject/settings/rules",
+    "2. Click 'New ruleset' → 'Import a ruleset' (paste this JSON)",
+    "",
+    "OR via GitHub CLI:",
+    "  gh api repos/juan-cely-l/futbolProject/rulesets --input ruleset.json",
+    "",
+    "PREREQUISITES before enabling:",
+    "  - CI workflow must pass on main branch (Backend + Frontend + Docker checks)",
+    "  - At least one collaborator must exist for code reviews",
+    "  - GPG signing must be configured for commit signing",
+    "",
+    "Optional: adjust bypass_mode to 'pull_requests_only' if you want admins",
+    "to also need PRs (more strict). Currently set to 'override' so bypasses",
+    "are logged but allowed for admins."
+  ]
+}
