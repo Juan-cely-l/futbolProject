@@ -17,7 +17,7 @@
 
 <!-- Describe the tests you ran or the manual verification steps. -->
 
-- [ ] `mvn test` — all 124 tests pass
+- [ ] `mvn test` — tests pass
 - [ ] `cd frontend && npm run build` — frontend builds clean
 - [ ] Manual smoke test (describe below)
 
