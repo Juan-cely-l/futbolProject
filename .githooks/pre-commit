@@ -71,7 +71,19 @@ if echo "$STAGED_JAVA" | grep -q .; then
     fi
 fi
 
-# ── 4. Build frontend if frontend files changed ────────────────────────
+# ── 4. Run backend tests if Java source files changed (non-blocking) ────
+
+if echo "$STAGED_JAVA" | grep -q .; then
+    echo "${CYAN}🧪 Running backend tests...${NC}"
+    if ! mvn test -q -B 2>/dev/null; then
+        echo "${YELLOW}⚠  Backend tests failed. Check details above.${NC}"
+        # Not blocking — compile passed, tests are extra safety
+    else
+        echo "${GREEN}✓  Backend tests pass${NC}"
+    fi
+fi
+
+# ── 5. Build frontend if frontend files changed ────────────────────────
 
 if echo "$STAGED_FRONTEND" | grep -q .; then
     echo "${CYAN}🎨 Verifying frontend build...${NC}"
@@ -84,7 +96,7 @@ if echo "$STAGED_FRONTEND" | grep -q .; then
     fi
 fi
 
-# ── 5. Check for large files being committed ───────────────────────────
+# ── 6. Check for large files being committed ───────────────────────────
 
 for file in $STAGED_ALL; do
     SIZE=$(git diff --cached -- "$file" | wc -c)
@@ -92,6 +104,27 @@ for file in $STAGED_ALL; do
         echo "${YELLOW}⚠  Large diff detected in $file (${SIZE} bytes)${NC}"
     fi
 done
+
+# ── 7. Secret scanning ──────────────────────────────────────────────────
+
+SECRET_PATTERNS='sk-[A-Za-z0-9]{20,}|-----BEGIN (RSA |EC )?PRIVATE KEY|ghp_[A-Za-z0-9]{36,}|gho_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9]{22,}|AKIA[0-9A-Z]{16}|SFMY[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}'
+
+SECRET_FILES=$(echo "$STAGED_ALL" | grep -E '\.(java|js|jsx|ts|tsx|py|properties|yml|yaml|sh|env)$' || true)
+
+if echo "$SECRET_FILES" | grep -q .; then
+    SECRETS_FOUND=$(git diff --cached -U0 -- "$SECRET_FILES" 2>/dev/null | grep -E "^\+.*($SECRET_PATTERNS)" || true)
+    if [ -n "$SECRETS_FOUND" ]; then
+        echo "${RED}✘ Potential secret(s) detected in staged changes:${NC}"
+        echo "$SECRETS_FOUND" | while read -r line; do
+            # Mask the secret for display
+            MASKED=$(echo "$line" | sed -E "s/($SECRET_PATTERNS)/\1...REDACTED/" 2>/dev/null || echo "$line")
+            echo "   $MASKED"
+        done
+        echo ""
+        echo "${RED}✘ Remove secrets before committing. Use .env files or env vars.${NC}"
+        FAILED=1
+    fi
+fi
 
 # ── Summary ────────────────────────────────────────────────────────────
 

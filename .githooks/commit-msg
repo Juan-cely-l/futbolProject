@@ -15,7 +15,7 @@ NC='\033[0m'
 COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
 
-PATTERN="^(feat|fix|docs|refactor|test|ci|style|chore|deps|wip|revert)(\(.+\))?: .{1,80}$"
+PATTERN="^(feat|fix|docs|refactor|test|ci|style|chore|deps|wip|revert)(\(.+\))?: .{1,72}$"
 MERGE_PATTERN="^Merge "
 
 if echo "$COMMIT_MSG" | grep -qE "$MERGE_PATTERN"; then
