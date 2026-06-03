@@ -168,3 +168,9 @@ npm run dev
 # Production build
 npm run build
 ```
+
+### CI/CD
+
+Branch protection rule required on `main` (GitHub > Settings > Branches):
+- Require status checks: **Backend**, **Frontend**, **Docker**
+- Dependabot auto-merges only **minor/patch** updates. Major updates are labeled `needs-review` for manual review.

@@ -1,3 +1,7 @@
+# NOTE: This workflow requires a branch protection rule on main that requires
+# status checks (Backend, Frontend, Docker) to pass before merging.
+# Configure in GitHub > Settings > Branches > Add classic branch protection rule > "main"
+
 name: Dependabot auto-merge
 
 on:
@@ -20,8 +24,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           alert-lookup: true
 
-      - name: Enable auto-merge
+      - name: Log update type
+        run: echo "Update type: ${{ steps.metadata.outputs.update-type }}"
+
+      - name: Enable auto-merge for minor/patch
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
         run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label major updates for manual review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr edit "$PR_URL" --add-label "needs-review"
+          gh pr comment "$PR_URL" --body "This is a **major update** that requires manual review. Auto-merge was not enabled."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
