@@ -46,6 +46,9 @@ futbolProject/
 │   ├── application-dev.properties               # ddl-auto=update, show-sql=true
 │   ├── application-prod.properties              # ddl-auto=validate, show-sql=false
 │   └── seed-data/liga_stats.json                # 5 leagues, 38 teams, 56 players (2025/26 season)
+├── .githooks/                                   # Git hooks (pre-commit, commit-msg)
+├── scripts/
+│   └── setup-hooks.sh                           # One-time setup: activate hooks + install tooling
 ├── frontend/                                    # React SPA
 │   ├── src/
 │   │   ├── main.jsx                             # React 19 entry, QueryClient + Router + ToastProvider + ErrorBoundary
@@ -115,9 +118,24 @@ futbolProject/
 
 ## Commands
 
+### Git Hooks Setup
+
+```bash
+# Run once after cloning to activate pre-commit + commit-msg hooks
+./scripts/setup-hooks.sh
+
+# Or manually:
+git config core.hooksPath .githooks
+chmod +x .githooks/pre-commit .githooks/commit-msg
+```
+
+The `.githooks/pre-commit` hook runs on every commit: warns on `console.log`/FIXME/TODO, blocks on backend compile failure, blocks on frontend build failure, and warns on large diffs (>500KB). The `.githooks/commit-msg` hook validates Conventional Commits format (`<type>: <subject>`).
+
 ### Docker (full stack)
 
 ```bash
+# Prerequisites: .env file with POSTGRES_* vars (see .env.example or README)
+
 # Start all services (PostgreSQL, backend, frontend)
 docker compose up -d
 
@@ -130,18 +148,19 @@ docker compose up -d
 ### Backend (local dev)
 
 ```bash
-# Prerequisites: PostgreSQL running, .env file with POSTGRES_* vars
+# Prerequisites: PostgreSQL running, .env file with POSTGRES_* vars (see README)
 
 # Start PostgreSQL
 docker compose up -d postgres-db
 
 # Run the Spring Boot app (dev profile, port 8080)
+# Use env vars from .env or pass inline:
 POSTGRES_USER=postgres POSTGRES_PASSWORD=your_password_here mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Build without tests
 mvn clean package -DskipTests
 
-# Run all tests (124 tests)
+# Run all tests
 mvn test
 
 # Run a single test class
@@ -167,6 +186,11 @@ npm run dev
 
 # Production build
 npm run build
+
+# Lint and format
+npm run lint
+npm run lint:fix        # auto-fix lint issues
+npm run format          # format with Prettier
 ```
 
 ### CI/CD
