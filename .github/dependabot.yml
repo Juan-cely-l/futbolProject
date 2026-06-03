@@ -58,6 +58,9 @@ updates:
       docker-deps:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
@@ -72,3 +75,6 @@ updates:
       actions-deps:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch
