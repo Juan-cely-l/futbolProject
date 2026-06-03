@@ -49,3 +49,15 @@ application-local.properties
 
 ### IntelliJ IDEA full ###
 .idea/
+
+### Claude Code ###
+.claude/
+
+### OS ###
+Thumbs.db
+
+### Editor swap files ###
+*.sw?
+
+### Logs ###
+*.log
