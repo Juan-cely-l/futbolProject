@@ -22,7 +22,7 @@ export default function PlayerProfile() {
 
   const { data: player, isLoading, isError } = usePlayerById(id)
 
-  const { data: efficiency } = useQuery({
+  useQuery({
     queryKey: ['efficiency', id],
     queryFn: () => fetchPlayerEfficiency(id),
     enabled: !!id,

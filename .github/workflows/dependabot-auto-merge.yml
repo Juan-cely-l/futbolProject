@@ -38,9 +38,7 @@ jobs:
 
       - name: Label major updates for manual review
         if: steps.metadata.outputs.update-type == 'version-update:semver-major'
-        run: |
-          gh pr edit "$PR_URL" --add-label "needs-review"
-          gh pr comment "$PR_URL" --body "This is a **major update** that requires manual review. Auto-merge was not enabled."
+        run: gh pr edit "$PR_URL" --add-label "needs-review"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
