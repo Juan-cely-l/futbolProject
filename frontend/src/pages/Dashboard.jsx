@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { useAllTeams } from '../hooks/useTeams'
 import { useAllPlayers } from '../hooks/usePlayers'
 import PlayerCard from '../components/PlayerCard'
@@ -8,7 +7,6 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function Dashboard() {
-  const navigate = useNavigate()
   const { data: teamsData, isLoading: teamsLoading } = useAllTeams()
   const { data: playersData, isLoading: playersLoading } = useAllPlayers()
 

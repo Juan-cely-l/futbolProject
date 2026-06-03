@@ -7,7 +7,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: America/Bogota
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - dependencies
       - backend
@@ -29,7 +29,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: America/Bogota
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - dependencies
       - frontend
@@ -58,6 +58,9 @@ updates:
       docker-deps:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
@@ -72,3 +75,6 @@ updates:
       actions-deps:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch

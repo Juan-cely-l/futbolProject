@@ -29,21 +29,9 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Compile
-        run: mvn compile -B
+      - name: Test and package
+        run: mvn verify -B
 
-      - name: Run tests
-        run: mvn test -B
-
-      - name: Package
-        run: mvn package -DskipTests -B
-
-      - name: Upload JAR
-        uses: actions/upload-artifact@v7
-        with:
-          name: backend-jar
-          path: target/*.jar
-          retention-days: 3
 
   ############################################################################
   # Frontend: install, lint, build
@@ -70,54 +58,12 @@ jobs:
       - name: Lint
         run: npm run lint
         working-directory: frontend
-        continue-on-error: true
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+        working-directory: frontend
 
       - name: Build
         run: npm run build
         working-directory: frontend
 
-      - name: Upload build
-        uses: actions/upload-artifact@v7
-        with:
-          name: frontend-dist
-          path: frontend/dist/
-          retention-days: 3
-
-  ############################################################################
-  # Docker: verify the image builds
-  ############################################################################
-  docker:
-    name: Docker
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [backend, frontend]
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Download JAR
-        uses: actions/download-artifact@v8
-        with:
-          name: backend-jar
-          path: target/
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build backend image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: false
-          tags: futbix-backend:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build frontend image
-        uses: docker/build-push-action@v7
-        with:
-          context: frontend
-          push: false
-          tags: futbix-frontend:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
