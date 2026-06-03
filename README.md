@@ -160,7 +160,7 @@ cd futbolProject
 # 2. Configure environment
 cat > .env << EOF
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=POSTGRES_PASSWORD_CHANGE_ME
+POSTGRES_PASSWORD=your_password_here
 POSTGRES_DB=futbol_db
 EOF
 
@@ -181,7 +181,7 @@ open http://localhost
 docker compose up -d postgres-db
 
 # Terminal 2 — Backend (port 8080)
-POSTGRES_USER=postgres POSTGRES_PASSWORD=POSTGRES_PASSWORD_CHANGE_ME \
+POSTGRES_USER=postgres POSTGRES_PASSWORD=your_password_here \
   mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Terminal 3 — Frontend (port 5173)
