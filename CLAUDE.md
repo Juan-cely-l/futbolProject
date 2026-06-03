@@ -136,7 +136,7 @@ docker compose up -d
 docker compose up -d postgres-db
 
 # Run the Spring Boot app (dev profile, port 8080)
-POSTGRES_USER=postgres POSTGRES_PASSWORD=POSTGRES_PASSWORD_CHANGE_ME mvn spring-boot:run -Dspring-boot.run.profiles=dev
+POSTGRES_USER=postgres POSTGRES_PASSWORD=your_password_here mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Build without tests
 mvn clean package -DskipTests
