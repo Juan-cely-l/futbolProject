@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { usePlayerById } from '../hooks/usePlayers'
-import { fetchPlayerEfficiency } from '../api/players'
 import { useUpdatePlayer, useDeletePlayer } from '../hooks/usePlayers'
 import { useAllTeams } from '../hooks/useTeams'
-import { useQuery } from '@tanstack/react-query'
 import PositionBadge from '../components/PositionBadge'
+import PlayerAvatar from '../components/PlayerAvatar'
 import SkeletonLoader from '../components/SkeletonLoader'
 import ConfirmModal from '../components/ConfirmModal'
 import EmptyState from '../components/EmptyState'
@@ -21,12 +20,6 @@ export default function PlayerProfile() {
   const toast = useToast()
 
   const { data: player, isLoading, isError } = usePlayerById(id)
-
-  useQuery({
-    queryKey: ['efficiency', id],
-    queryFn: () => fetchPlayerEfficiency(id),
-    enabled: !!id,
-  })
 
   const { data: teamsData } = useAllTeams()
   const teams = teamsData?.content || []
@@ -103,14 +96,7 @@ export default function PlayerProfile() {
         padding: 32, marginBottom: 28, display: 'flex', alignItems: 'center',
         gap: 28, flexWrap: 'wrap',
       }}>
-        <div style={{
-          width: 80, height: 80, borderRadius: '50%', background: '#B8FF47',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Oswald', sans-serif", fontSize: 36, fontWeight: 700,
-          color: '#0A1A12', flexShrink: 0,
-        }}>
-          {player.goals || '0'}
-        </div>
+        <PlayerAvatar name={player.name} photo={player.photo} size="lg" />
 
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>

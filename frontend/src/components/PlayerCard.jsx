@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PositionBadge from './PositionBadge'
+import PlayerAvatar from './PlayerAvatar'
 import StatBar from './StatBar'
 import { formatCurrency } from '../utils/formatCurrency'
 import { computeEfficiency } from '../utils/computeEfficiency'
@@ -33,22 +34,7 @@ export default function PlayerCard({ player, delay = 0 }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <div style={{
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          background: '#B8FF47',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: "'Oswald', sans-serif",
-          fontSize: 20,
-          fontWeight: 700,
-          color: '#0A1A12',
-          flexShrink: 0,
-        }}>
-          {player.goals ?? '—'}
-        </div>
+        <PlayerAvatar name={player.name} photo={player.photo} size="md" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontSize: 15,
@@ -88,7 +74,7 @@ export default function PlayerCard({ player, delay = 0 }) {
         )}
       </div>
 
-      <StatBar goals={player.goals} assists={player.assists} matches={player.matches} />
+      <StatBar goals={player.goals} assists={player.assists} matches={player.matches} showLabels={false} />
     </div>
   )
 }

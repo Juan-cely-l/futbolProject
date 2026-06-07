@@ -53,6 +53,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .matches(request.getMatches())
                 .valueMarket(request.getValueMarket())
                 .team(team)
+                .photo(request.getPhoto())
                 .build();
         try {
             Player saved = playerRepository.save(player);
@@ -105,6 +106,10 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (request.getPosition() != null) {
             player.setPosition(request.getPosition());
+        }
+
+        if (request.getPhoto() != null) {
+            player.setPhoto(request.getPhoto());
         }
 
         String name = player.getName();

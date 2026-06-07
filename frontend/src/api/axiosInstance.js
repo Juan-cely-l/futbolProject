@@ -10,7 +10,12 @@ api.interceptors.response.use(
   (err) => {
     const message =
       err.response?.data?.message || err.message || 'An unexpected error occurred'
-    return Promise.reject({ ...err, friendlyMessage: message })
+    const enhanced = new Error(message)
+    enhanced.friendlyMessage = message
+    enhanced.status = err.response?.status
+    enhanced.response = err.response
+    enhanced.code = err.code
+    return Promise.reject(enhanced)
   },
 )
 

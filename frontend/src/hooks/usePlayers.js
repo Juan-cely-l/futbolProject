@@ -40,6 +40,7 @@ export function useUpdatePlayer() {
     mutationFn: ({ id, data }) => updatePlayer(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['players'] })
+      qc.invalidateQueries({ queryKey: ['player'] })
       qc.invalidateQueries({ queryKey: ['squad'] })
     },
   })
@@ -51,6 +52,7 @@ export function useDeletePlayer() {
     mutationFn: deletePlayer,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['players'] })
+      qc.invalidateQueries({ queryKey: ['player'] })
       qc.invalidateQueries({ queryKey: ['squad'] })
     },
   })

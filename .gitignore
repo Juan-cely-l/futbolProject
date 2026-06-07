@@ -1,14 +1,22 @@
+### Java / Maven ###
 target/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+### Maven wrapper ###
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+
+### Kotlin ###
 .kotlin
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -35,30 +43,38 @@ build/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
-.DS_Store
-
-### Frontend ###
+### Node / Frontend ###
 frontend/node_modules/
 frontend/dist/
 
 ### Environment ###
 .env
 .env.local
+.env.*.local
 application-local.properties
 
-### IntelliJ IDEA full ###
-.idea/
-
-### Claude Code ###
-.claude/
-prompt_plan.md
-
 ### OS ###
+.DS_Store
 Thumbs.db
-
-### Editor swap files ###
-*.sw?
+*.swp
+*.swo
+*~
 
 ### Logs ###
 *.log
+logs/
+
+### Test coverage ###
+coverage/
+.nyc_output/
+
+### Project planning (not source code) ###
+PLAN_API_FOOTBALL.md
+prompt_plan.md
+openspec/
+
+### Claude AI ###
+.claude/
+
+### Docker ###
+.docker/
