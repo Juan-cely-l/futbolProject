@@ -26,4 +26,6 @@ public class PlayerResponse {
     private Integer valueMarket;
 
     private String teamName;
+
+    private String photo;
 }

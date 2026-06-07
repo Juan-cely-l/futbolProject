@@ -17,6 +17,7 @@ public class PlayerMapper {
                 .matches(player.getMatches())
                 .valueMarket(player.getValueMarket())
                 .teamName(player.getTeam() != null ? player.getTeam().getName() : null)
+                .photo(player.getPhoto())
                 .build();
     }
 }

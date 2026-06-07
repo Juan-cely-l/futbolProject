@@ -1,0 +1,42 @@
+{
+  "ligas": [
+    {
+      "liga_id": "TEST_LG",
+      "nombre": "Test League",
+      "pais": "Testland",
+      "temporada": 2024,
+      "equipos": [
+        {
+          "equipo_id": "t1",
+          "nombre": "FC TestCity",
+          "url_escudo": null,
+          "posicion_final": 5
+        },
+        {
+          "equipo_id": "t2",
+          "nombre": "Real TestTown",
+          "url_escudo": null,
+          "posicion_final": 10
+        }
+      ],
+      "estadisticas_jugadores": [
+        {
+          "equipo_id": "t1",
+          "nombre": "Juan Perez",
+          "posicion": "portero",
+          "goles": 0,
+          "asistencias": 1,
+          "partidos_jugados": 20
+        },
+        {
+          "equipo_id": "t2",
+          "nombre": "Carlos Lopez",
+          "posicion": "libero",
+          "goles": 5,
+          "asistencias": 3,
+          "partidos_jugados": 15
+        }
+      ]
+    }
+  ]
+}

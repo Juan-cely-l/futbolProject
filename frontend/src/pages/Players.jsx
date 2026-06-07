@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePlayers, useDeletePlayer } from '../hooks/usePlayers'
 import PlayerCard from '../components/PlayerCard'
+import PlayerAvatar from '../components/PlayerAvatar'
 import PositionBadge from '../components/PositionBadge'
 import SkeletonLoader from '../components/SkeletonLoader'
 import Pagination from '../components/Pagination'
@@ -195,7 +196,12 @@ export default function Players() {
                       onClick={() => navigate(`/players/${p.id}`)}
                     >
                       <td style={{ ...cellStyle, color: '#64748B' }}>{page * 15 + i + 1}</td>
-                      <td style={{ ...cellStyle, fontWeight: 600 }}>{p.name}</td>
+                      <td style={{ ...cellStyle, fontWeight: 600 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <PlayerAvatar name={p.name} photo={p.photo} size="sm" />
+                          {p.name}
+                        </div>
+                      </td>
                       <td style={cellStyle}><PositionBadge position={p.position} /></td>
                       <td style={cellStyle}>{p.age}</td>
                       <td style={{ ...cellStyle, color: '#94A3B8' }}>{p.teamName || '—'}</td>

@@ -1,5 +1,6 @@
 import { useAllTeams } from '../hooks/useTeams'
 import { useAllPlayers } from '../hooks/usePlayers'
+import { useSync } from '../context/SyncContext'
 import PlayerCard from '../components/PlayerCard'
 import TeamCard from '../components/TeamCard'
 import SkeletonLoader from '../components/SkeletonLoader'
@@ -9,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 export default function Dashboard() {
   const { data: teamsData, isLoading: teamsLoading } = useAllTeams()
   const { data: playersData, isLoading: playersLoading } = useAllPlayers()
+  const { syncStatus, progress, resumed } = useSync()
 
   const teams = teamsData?.content || []
   const players = playersData?.content || []
@@ -75,6 +77,38 @@ export default function Dashboard() {
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, fontFamily: "'Oswald', sans-serif", letterSpacing: '0.02em' }}>
         Dashboard
       </h1>
+
+      {/* Sync Progress */}
+      {syncStatus === 'syncing' && (
+        <div style={{
+          background: '#11291B',
+          border: '1px solid #1E422E',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+        }}>
+          <div style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#22C55E',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', fontFamily: "'Oswald', sans-serif", letterSpacing: '0.03em' }}>
+              Syncing external data...
+            </div>
+            <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 2 }}>
+              {progress.totalTeams > 0
+                ? `Team ${progress.processedTeams} of ${progress.totalTeams} • ${progress.playersCreated} players created`
+                : resumed ? 'Resuming previous sync...' : 'Starting sync...'}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Metrics */}
       <div style={{

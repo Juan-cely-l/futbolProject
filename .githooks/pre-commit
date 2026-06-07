@@ -126,6 +126,15 @@ if echo "$SECRET_FILES" | grep -q .; then
     fi
 fi
 
+# ── 8. Gitleaks secret scanning ──────────────────────────────────────────
+
+if command -v gitleaks &> /dev/null; then
+    if ! gitleaks detect --no-git --source . --no-banner 2>/dev/null; then
+        echo "${RED}✘ Secrets detected by gitleaks${NC}"
+        FAILED=1
+    fi
+fi
+
 # ── Summary ────────────────────────────────────────────────────────────
 
 echo ""
