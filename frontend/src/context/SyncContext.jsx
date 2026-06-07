@@ -29,7 +29,7 @@ export function SyncProvider({ children }) {
 
   const mutation = useMutation({
     mutationFn: ({ leagueIds, season }) => triggerSync(leagueIds, season),
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       retryCount.current = 0
       setResumed(false)
       setSyncId(data.syncId)
@@ -144,6 +144,7 @@ export function SyncProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSync() {
   const ctx = useContext(SyncContext)
   if (!ctx) throw new Error('useSync must be used within SyncProvider')
