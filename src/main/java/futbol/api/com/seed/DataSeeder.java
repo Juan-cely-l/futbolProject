@@ -1,6 +1,8 @@
 package futbol.api.com.seed;
 
 import tools.jackson.databind.ObjectMapper;
+import futbol.api.com.external.mapper.MarketValueCalculator;
+import futbol.api.com.external.mapper.TeamNameNormalizer;
 import futbol.api.com.models.Player;
 import futbol.api.com.models.Position;
 import futbol.api.com.models.Team;
@@ -12,10 +14,10 @@ import futbol.api.com.seed.dto.LigaData;
 import futbol.api.com.seed.dto.SeedData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,6 +30,10 @@ public class DataSeeder {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final ObjectMapper objectMapper;
+    private final MarketValueCalculator marketValueCalculator;
+
+    @Value("${seed.data.path:seed-data/liga_stats.json}")
+    private String seedDataPath;
 
     private static final Map<String, Double> LIGA_BUDGET_MULTIPLIER = Map.of(
             "ENG_PL", 1.0,
@@ -68,7 +74,7 @@ public class DataSeeder {
 
             // 1. Crear equipos de esta liga
             for (EquipoData eq : liga.getEquipos()) {
-                String name = eq.getNombre().toLowerCase().trim();
+                String name = TeamNameNormalizer.normalize(eq.getNombre());
                 String city = extractCity(eq.getNombre(), liga.getPais());
 
                 if (teamRepository.existsByNameIgnoreCase(name)) {
@@ -106,7 +112,11 @@ public class DataSeeder {
                     Position position = mapPosition(js.getPosicion());
                     int age = generateAge(position);
                     String name = js.getNombre().toLowerCase().trim();
-                    Integer valueMarket = generateValueMarket(position, age, js.getGoles());
+                    Integer valueMarket = marketValueCalculator.calculate(
+                            position, age,
+                            js.getGoles(),
+                            js.getAsistencias(),
+                            js.getPartidosJugados());
 
                     if (playerRepository.existsPlayerByNameAndAgeAndTeamName(name, age, team.getName())) {
                         playersSkipped++;
@@ -140,10 +150,10 @@ public class DataSeeder {
 
     private SeedData loadJson() {
         try {
-            var resource = new ClassPathResource("seed-data/liga_stats.json");
+            var resource = new ClassPathResource(seedDataPath);
             return objectMapper.readValue(resource.getInputStream(), SeedData.class);
         } catch (IOException e) {
-            log.error("Failed to load seed data from seed-data/liga_stats.json", e);
+            log.error("Failed to load seed data from {}", seedDataPath, e);
             return null;
         }
     }
@@ -199,24 +209,7 @@ public class DataSeeder {
         return base;
     }
 
-    private Integer generateValueMarket(Position position, int age, int goals) {
-        long base = switch (position) {
-            case GOALKEEPER -> 8_000_000L;
-            case DEFENDER -> 12_000_000L;
-            case MIDFIELDER -> 18_000_000L;
-            case FORWARD -> 25_000_000L;
-        };
 
-        // Pico de valor a los 25-27 años
-        double ageFactor = 1.0 - (Math.abs(age - 26) * 0.04);
-        ageFactor = Math.max(0.3, Math.min(1.0, ageFactor));
-
-        // Bonus por goles (solo relevantes para delanteros y extremos)
-        long goalsBonus = (long) goals * 2_000_000L;
-
-        long randomNoise = ThreadLocalRandom.current().nextLong(0, 10_000_000L);
-        return (int) ((base + goalsBonus + randomNoise) * ageFactor);
-    }
 
     public record SeedResult(int teamsCreated, int playersCreated, String message) {}
 }

@@ -33,5 +33,5 @@ public class UpdatePlayerRequest {
 
     private String teamName;
 
-
-}
+    @Size(max = 500)
+    private String photo;}

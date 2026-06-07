@@ -22,7 +22,7 @@ export default function Teams() {
   const [form, setForm] = useState({ name: '', city: '', budget: '' })
   const [formError, setFormError] = useState('')
 
-  const { data, isLoading } = useTeams(page, 9, SORT_OPTIONS[sortIdx].sortBy, SORT_OPTIONS[sortIdx].sortDir, search || undefined)
+  const { data, isLoading, isError, error } = useTeams(page, 9, SORT_OPTIONS[sortIdx].sortBy, SORT_OPTIONS[sortIdx].sortDir, search || undefined)
   const createMutation = useCreateTeam()
 
   const teams = data?.content || []
@@ -112,6 +112,11 @@ export default function Teams() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
           <SkeletonLoader type="card" count={6} />
         </div>
+      ) : isError ? (
+        <EmptyState
+          title="Failed to load teams"
+          message={error?.friendlyMessage || error?.message || 'An unexpected error occurred while loading teams.'}
+        />
       ) : teams.length === 0 ? (
         <EmptyState
           title="No teams found"
