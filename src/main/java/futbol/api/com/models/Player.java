@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PostLoad;
@@ -25,7 +26,8 @@ import org.springframework.data.domain.Persistable;
 import java.util.UUID;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "age", "team_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "age", "team_id"}),
+       indexes = @Index(columnList = "team_id", name = "idx_player_team_id"))
 @Builder
 @Getter
 @Setter

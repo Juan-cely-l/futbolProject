@@ -1,7 +1,7 @@
 import api from './axiosInstance'
 
-export const triggerSync = (leagueIds, season) =>
-  api.post('/sync', { leagueIds, season }).then(r => r.data)
+export const triggerSync = (leagueIds, season, maxTeams) =>
+  api.post('/sync', { leagueIds, season, maxTeams }).then(r => r.data)
 
 export const getSyncStatus = (syncId) =>
   api.get(`/sync/${syncId}`).then(r => r.data)

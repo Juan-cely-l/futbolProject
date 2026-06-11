@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "status", 404,
                 "error", "Not Found",
-                "message", exception.getMessage()
+                "message", "Resource not found"
         ));
     }
 
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "status", 405,
                 "error", "Method Not Allowed",
-                "message", exception.getMessage()
+                "message", "This endpoint does not support the requested HTTP method."
         ));
     }
 
@@ -146,7 +146,7 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "status", status.value(),
                 "error", status.getReasonPhrase(),
-                "message", exception.getMessage()
+                "message", "External service returned an error."
         ));
     }
 

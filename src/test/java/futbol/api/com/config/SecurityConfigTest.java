@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 class SecurityConfigTest {
 
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final RateLimitFilter rateLimitFilter = mock(RateLimitFilter.class);
 
     @Test
     @DisplayName("userDetailsService: creates user when ADMIN_PASSWORD is set")
@@ -23,7 +24,7 @@ class SecurityConfigTest {
         Environment env = mock(Environment.class);
         when(env.getProperty("ADMIN_PASSWORD", System.getenv("ADMIN_PASSWORD"))).thenReturn("test123");
 
-        SecurityConfig config = new SecurityConfig(env);
+        SecurityConfig config = new SecurityConfig(env, rateLimitFilter);
         InMemoryUserDetailsManager manager = (InMemoryUserDetailsManager) config.userDetailsService(encoder);
 
         assertThat(manager.loadUserByUsername("admin")).isNotNull();
@@ -36,7 +37,7 @@ class SecurityConfigTest {
         Environment env = mock(Environment.class);
         when(env.getProperty("ADMIN_PASSWORD", System.getenv("ADMIN_PASSWORD"))).thenReturn(null);
 
-        SecurityConfig config = new SecurityConfig(env);
+        SecurityConfig config = new SecurityConfig(env, rateLimitFilter);
 
         assertThatThrownBy(() -> config.userDetailsService(encoder))
                 .isInstanceOf(IllegalStateException.class)
@@ -47,7 +48,7 @@ class SecurityConfigTest {
     @DisplayName("passwordEncoder: returns BCryptPasswordEncoder")
     void passwordEncoder_returnsBCrypt() {
         Environment env = mock(Environment.class);
-        SecurityConfig config = new SecurityConfig(env);
+        SecurityConfig config = new SecurityConfig(env, rateLimitFilter);
 
         PasswordEncoder result = config.passwordEncoder();
 

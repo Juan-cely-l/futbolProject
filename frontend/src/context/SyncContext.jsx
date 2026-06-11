@@ -28,7 +28,7 @@ export function SyncProvider({ children }) {
   const addToast = useToast()
 
   const mutation = useMutation({
-    mutationFn: ({ leagueIds, season }) => triggerSync(leagueIds, season),
+    mutationFn: ({ leagueIds, season, maxTeams }) => triggerSync(leagueIds, season, maxTeams),
     onSuccess: (data) => {
       retryCount.current = 0
       setResumed(false)
@@ -124,9 +124,9 @@ export function SyncProvider({ children }) {
     return () => clearInterval(interval)
   }, [syncId, status, queryClient, addToast])
 
-  const startSync = useCallback((leagueIds, season) => {
-    syncArgsRef.current = { leagueIds, season }
-    mutation.mutate({ leagueIds, season })
+  const startSync = useCallback((leagueIds, season, maxTeams) => {
+    syncArgsRef.current = { leagueIds, season, maxTeams }
+    mutation.mutate({ leagueIds, season, maxTeams })
   }, [mutation])
 
   return (

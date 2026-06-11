@@ -42,8 +42,8 @@ class SyncControllerTest {
     @DisplayName("POST /futbix/v1/sync with leagueIds -> 202 Accepted")
     void startSync_withLeagueIds_returnsAccepted() {
         UUID syncId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-        SyncRequest request = new SyncRequest(List.of(140, 39), 2024);
-        when(syncService.syncAll(request.leagueIds(), request.season())).thenReturn(syncId);
+        SyncRequest request = new SyncRequest(List.of(140, 39), 2024, null);
+        when(syncService.syncAll(request.leagueIds(), request.season(), request.maxTeams())).thenReturn(syncId);
 
         ResponseEntity<Map<String, Object>> response = controller.startSync(request);
 
@@ -57,8 +57,8 @@ class SyncControllerTest {
     @DisplayName("POST /futbix/v1/sync with null leagueIds -> defaults to [140]")
     void startSync_nullLeagueIds_defaultsTo140() {
         UUID syncId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-        SyncRequest request = new SyncRequest(null, 2024);
-        when(syncService.syncAll(List.of(140), 2024)).thenReturn(syncId);
+        SyncRequest request = new SyncRequest(null, 2024, null);
+        when(syncService.syncAll(List.of(140), 2024, null)).thenReturn(syncId);
 
         ResponseEntity<Map<String, Object>> response = controller.startSync(request);
 

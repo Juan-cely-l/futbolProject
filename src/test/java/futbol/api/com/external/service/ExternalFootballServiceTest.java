@@ -115,7 +115,7 @@ class ExternalFootballServiceTest {
     void syncAll_setsCorrectLeagueIds() {
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of());
 
-        UUID syncId = service.syncAll(List.of(78, 39), 2024);
+        UUID syncId = service.syncAll(List.of(78, 39), 2024, null);
 
         SyncProgress progress = service.getProgress(syncId);
         assertThat(progress.leagueIds()).containsExactly(78, 39);

@@ -28,7 +28,7 @@ class RateLimitFilterTest {
 
     @BeforeEach
     void setUp() {
-        filter = new RateLimitFilter(100);
+        filter = new RateLimitFilter(100, "");
         lenient().when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         lenient().when(request.getHeader("X-Forwarded-For")).thenReturn(null);
     }

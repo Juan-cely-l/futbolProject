@@ -32,7 +32,7 @@ public class SyncController {
         List<Integer> leagueIds = request.leagueIds() != null ? request.leagueIds() : List.of(140);
         Integer season = request.season();
 
-        UUID syncId = syncService.syncAll(leagueIds, season);
+        UUID syncId = syncService.syncAll(leagueIds, season, request.maxTeams());
 
         return ResponseEntity.accepted().body(Map.of(
                 "syncId", syncId.toString(),

@@ -2,6 +2,7 @@ package futbol.api.com.dtos.player;
 
 import futbol.api.com.models.Position;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,4 +35,6 @@ public class UpdatePlayerRequest {
     private String teamName;
 
     @Size(max = 500)
-    private String photo;}
+    @Pattern(regexp = "^(https?://).*", message = "Photo URL must start with http:// or https://")
+    private String photo;
+}

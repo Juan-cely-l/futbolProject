@@ -84,17 +84,17 @@ public class ExternalFootballService {
 
     // ─── public API ─────────────────────────────────────
 
-    public UUID syncAll(List<Integer> leagueIds, Integer season) {
+    public UUID syncAll(List<Integer> leagueIds, Integer season, Integer maxTeams) {
         if (!syncInProgress.compareAndSet(false, true)) {
             throw new SyncInProgressException("A sync is already in progress. Wait for it to complete before starting another.");
         }
         UUID syncId = UUID.randomUUID();
-        self.executeSync(syncId, leagueIds, season);
+        self.executeSync(syncId, leagueIds, season, maxTeams);
         return syncId;
     }
 
     public UUID syncAll(Integer leagueId) {
-        return syncAll(List.of(leagueId), config.season());
+        return syncAll(List.of(leagueId), config.season(), null);
     }
 
     public List<LeagueInfo> getAvailableLeagues() {
@@ -110,7 +110,7 @@ public class ExternalFootballService {
     // ─── async sync ─────────────────────────────────────
 
     @Async("footballSyncExecutor")
-    public CompletableFuture<Void> executeSync(UUID syncId, List<Integer> leagueIds, Integer season) {
+    public CompletableFuture<Void> executeSync(UUID syncId, List<Integer> leagueIds, Integer season, Integer maxTeams) {
         SyncStats stats = new SyncStats(leagueIds, season);
         progressMap.put(syncId, stats);
 
@@ -123,7 +123,7 @@ public class ExternalFootballService {
                 stats.totalTeams = 0;
 
                 // Rate limit pre-check (also caches team list to avoid double fetch)
-                LeagueData leagueData = estimateRequestsForLeague(leagueId, season);
+                LeagueData leagueData = estimateRequestsForLeague(leagueId, season, maxTeams);
                 if (requestCounter.remaining() < leagueData.estimated()) {
                     String msg = String.format(
                             "League %d (%s) skipped: only %d requests remaining, ~%d needed",
@@ -135,7 +135,7 @@ public class ExternalFootballService {
                 }
 
                 try {
-                    processLeague(leagueId, season, stats, leagueData.teams());
+                    processLeague(leagueId, season, stats, leagueData.teams(), maxTeams);
                 } catch (Exception e) {
                     log.error("Error processing league {}: {}", leagueId, e.getMessage(), e);
                     stats.status = PARTIAL;
@@ -161,9 +161,12 @@ public class ExternalFootballService {
 
     private record LeagueData(int estimated, List<TeamData> teams) {}
 
-    private LeagueData estimateRequestsForLeague(Integer leagueId, Integer season) {
+    private LeagueData estimateRequestsForLeague(Integer leagueId, Integer season, Integer maxTeams) {
         try {
             List<TeamData> teams = apiClient.getTeamsByLeague(leagueId, season);
+            if (maxTeams != null && maxTeams < teams.size()) {
+                teams = teams.subList(0, maxTeams);
+            }
             int estimated = (int) (ESTIMATED_REQUESTS_PER_LEAGUE_FIXED + teams.size() * ESTIMATED_REQUESTS_PER_TEAM);
             return new LeagueData(estimated, teams);
         } catch (Exception e) {
@@ -171,9 +174,13 @@ public class ExternalFootballService {
         }
     }
 
-    private void processLeague(Integer leagueId, Integer season, SyncStats stats, List<TeamData> teams) {
+    private void processLeague(Integer leagueId, Integer season, SyncStats stats, List<TeamData> teams, Integer maxTeams) {
         if (teams.isEmpty()) {
             teams = apiClient.getTeamsByLeague(leagueId, season);
+        }
+        if (maxTeams != null && maxTeams < teams.size()) {
+            teams = teams.subList(0, maxTeams);
+            log.info("Limited to {} teams (maxTeams={})", teams.size(), maxTeams);
         }
         stats.totalTeams = teams.size();
         log.info("Processing league {} ({}): {} teams", leagueId,

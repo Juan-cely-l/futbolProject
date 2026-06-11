@@ -104,6 +104,6 @@ class CreateTeamRequestTest {
 
         Set<ConstraintViolation<CreateTeamRequest>> violations = validator.validate(request);
 
-        assertThat(violations).hasSize(3);
+        assertThat(violations).hasSize(5);
     }
 }

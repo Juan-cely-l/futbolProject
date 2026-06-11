@@ -9,6 +9,8 @@ export default function SyncModal({ open, onClose }) {
   const [selectedSeason, setSelectedSeason] = useState(null)
   const [showProgress, setShowProgress] = useState(false)
   const [expandedTeam, setExpandedTeam] = useState(null)
+  const [limitEnabled, setLimitEnabled] = useState(false)
+  const [maxTeams, setMaxTeams] = useState(20)
 
   const { data: leagues } = useQuery({
     queryKey: ['sync-leagues'],
@@ -44,7 +46,8 @@ export default function SyncModal({ open, onClose }) {
   const handleStart = () => {
     if (selectedLeagues.length === 0) return
     setShowProgress(true)
-    startSync(selectedLeagues, selectedSeason)
+    const resolvedMaxTeams = limitEnabled ? Math.max(1, maxTeams) : null
+    startSync(selectedLeagues, selectedSeason, resolvedMaxTeams)
   }
 
   const handleClose = () => {
@@ -238,6 +241,30 @@ export default function SyncModal({ open, onClose }) {
                     </option>
                   ))}
                 </select>
+              )}
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer text-gray-200 hover:text-white">
+                <input
+                  type="checkbox"
+                  checked={limitEnabled}
+                  onChange={(e) => setLimitEnabled(e.target.checked)}
+                  className="accent-lime-400"
+                />
+                <span className="text-sm font-medium">Limit teams per league</span>
+              </label>
+              {limitEnabled && (
+                <div className="flex items-center gap-2 mt-1 ml-6">
+                  <input
+                    type="number"
+                    min={1}
+                    value={maxTeams}
+                    onChange={(e) => setMaxTeams(Math.max(1, Number(e.target.value)))}
+                    className="w-24 bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm"
+                  />
+                  <span className="text-xs text-gray-400">max teams</span>
+                </div>
               )}
             </div>
 

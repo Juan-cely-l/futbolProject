@@ -82,14 +82,14 @@ class GlobalExceptionHandlerTest {
     class NotFoundTests {
 
         @Test
-        @DisplayName("should return 404 with exception message")
+        @DisplayName("should return 404 with generic message (no leak)")
         void handleNotFound_returns404() {
             String message = "Player with ID 123 not found";
             ResourceNotFoundException exception = new ResourceNotFoundException(message);
 
             ResponseEntity<Map<String, Object>> response = handler.handleNotFound(exception);
 
-            assertStandardErrorResponse(response, HttpStatus.NOT_FOUND, "Not Found", message);
+            assertStandardErrorResponse(response, HttpStatus.NOT_FOUND, "Not Found", "Resource not found");
         }
 
         @Test
@@ -265,7 +265,7 @@ class GlobalExceptionHandlerTest {
     class MethodNotAllowedTests {
 
         @Test
-        @DisplayName("should return 405 with exception message")
+        @DisplayName("should return 405 with generic message (no method leak)")
         void handleMethodNotAllowed_returns405() {
             HttpRequestMethodNotSupportedException exception =
                     new HttpRequestMethodNotSupportedException("PATCH");
@@ -273,7 +273,7 @@ class GlobalExceptionHandlerTest {
             ResponseEntity<Map<String, Object>> response = handler.handleMethodNotAllowed(exception);
 
             assertStandardErrorResponse(response, HttpStatus.METHOD_NOT_ALLOWED,
-                    "Method Not Allowed", exception.getMessage());
+                    "Method Not Allowed", "This endpoint does not support the requested HTTP method.");
         }
     }
 
@@ -334,7 +334,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getBody())
                     .containsEntry("status", 429)
                     .containsEntry("error", "Too Many Requests")
-                    .containsEntry("message", "Rate limit exceeded");
+                    .containsEntry("message", "External service returned an error.");
             assertThat(response.getBody().get("timestamp")).isInstanceOf(LocalDateTime.class);
         }
 
@@ -465,7 +465,7 @@ class GlobalExceptionHandlerTest {
 
             ResponseEntity<Map<String, Object>> response = handler.handleNotFound(exception);
 
-            assertStandardErrorResponse(response, HttpStatus.NOT_FOUND, "Not Found", "");
+            assertStandardErrorResponse(response, HttpStatus.NOT_FOUND, "Not Found", "Resource not found");
         }
 
         @Test

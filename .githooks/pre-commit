@@ -63,7 +63,7 @@ fi
 
 if echo "$STAGED_JAVA" | grep -q .; then
     echo "${CYAN}☕  Verifying backend compilation...${NC}"
-    if ! mvn compile -q -B 2>/dev/null; then
+    if ! mvn compile -q -B; then
         echo "${RED}✘ Backend compilation failed.${NC}"
         FAILED=1
     else
@@ -71,13 +71,13 @@ if echo "$STAGED_JAVA" | grep -q .; then
     fi
 fi
 
-# ── 4. Run backend tests if Java source files changed (non-blocking) ────
+# ── 4. Run backend tests if Java source files changed (blocking) ────
 
 if echo "$STAGED_JAVA" | grep -q .; then
     echo "${CYAN}🧪 Running backend tests...${NC}"
-    if ! mvn test -q -B 2>/dev/null; then
-        echo "${YELLOW}⚠  Backend tests failed. Check details above.${NC}"
-        # Not blocking — compile passed, tests are extra safety
+    if ! mvn test -q -B; then
+        echo "${RED}✘  Backend tests failed.${NC}"
+        FAILED=1
     else
         echo "${GREEN}✓  Backend tests pass${NC}"
     fi
@@ -87,7 +87,7 @@ fi
 
 if echo "$STAGED_FRONTEND" | grep -q .; then
     echo "${CYAN}🎨 Verifying frontend build...${NC}"
-    if ! cd frontend && npm run build -- --logLevel error 2>/dev/null && cd ..; then
+    if ! cd frontend && npm run build -- --logLevel error && cd ..; then
         echo "${RED}✘ Frontend build failed.${NC}"
         cd ..
         FAILED=1
@@ -129,10 +129,12 @@ fi
 # ── 8. Gitleaks secret scanning ──────────────────────────────────────────
 
 if command -v gitleaks &> /dev/null; then
-    if ! gitleaks detect --no-git --source . --no-banner 2>/dev/null; then
+    if ! gitleaks protect --staged --no-banner 2>/dev/null; then
         echo "${RED}✘ Secrets detected by gitleaks${NC}"
         FAILED=1
     fi
+else
+    echo "${YELLOW}⚠  gitleaks not found. Install it: https://github.com/gitleaks/gitleaks${NC}"
 fi
 
 # ── Summary ────────────────────────────────────────────────────────────

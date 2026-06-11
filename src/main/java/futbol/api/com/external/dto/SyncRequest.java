@@ -4,5 +4,6 @@ import java.util.List;
 
 public record SyncRequest(
         List<Integer> leagueIds,
-        Integer season
+        Integer season,
+        Integer maxTeams
 ) {}
