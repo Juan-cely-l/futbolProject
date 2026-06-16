@@ -115,7 +115,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional(readOnly = true)
-    public TeamResponse getTeambyName(String name) {
+    public TeamResponse getTeamByName(String name) {
         Team team = teamRepository.findTeamByNameIgnoreCase(name)
                 .orElseThrow(() -> new ResourceNotFoundException("This team doesn't exist: " + name));
         return mapToResponseDto(team);

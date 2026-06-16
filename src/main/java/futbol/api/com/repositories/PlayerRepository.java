@@ -19,11 +19,7 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
 
     List<Player> findByName(String name);
 
-    List<Player> findByTeamId(UUID teamId);
-
     List<Player> findPlayersByTeam_Name(String teamName);
-
-    List<Player> findByAge(Integer age);
 
     @EntityGraph(attributePaths = "team")
     Page<Player> findAll(@NonNull Pageable pageable);

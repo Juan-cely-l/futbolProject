@@ -14,7 +14,7 @@ public interface TeamService {
     TeamResponse createTeam(CreateTeamRequest request);
     TeamResponse updateTeam(UUID id, UpdateTeamRequest request);
     TeamResponse getTeamById(UUID id);
-    TeamResponse getTeambyName(String name);
+    TeamResponse getTeamByName(String name);
     Page<TeamResponse> getAllTeams(int page, int size, String sortBy, String sortDir, String search);
     List<PlayerResponse> getTeamSquad(String name);
     TeamValueResponse getTeamValue(String name);

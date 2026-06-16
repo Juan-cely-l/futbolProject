@@ -97,28 +97,6 @@ class PlayerRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByTeamId should return all players belonging to the team")
-    void findByTeamId_returnsTeamPlayers() {
-        List<Player> players = playerRepository.findByTeamId(barcelona.getId());
-
-        assertThat(players).hasSize(2);
-        assertThat(players).extracting(Player::getId)
-                .containsExactlyInAnyOrder(messi.getId(), pedri.getId());
-    }
-
-    @Test
-    @DisplayName("findByTeamId should return empty list when team has no players")
-    void findByTeamId_noPlayers_returnsEmptyList() {
-        Team emptyTeam = teamRepository.save(Team.builder()
-                .name("Empty FC")
-                .budget(100_000_000L)
-                .city("Nowhere")
-                .build());
-
-        assertThat(playerRepository.findByTeamId(emptyTeam.getId())).isEmpty();
-    }
-
-    @Test
     @DisplayName("findPlayersByTeam_Name should return players for given team name")
     void findPlayersByTeam_Name_returnsTeamPlayers() {
         List<Player> players = playerRepository.findPlayersByTeam_Name("Barcelona");
@@ -132,21 +110,6 @@ class PlayerRepositoryTest {
     @DisplayName("findPlayersByTeam_Name should return empty list for non-existent team name")
     void findPlayersByTeam_Name_noMatch_returnsEmptyList() {
         assertThat(playerRepository.findPlayersByTeam_Name("NonExistentTeam")).isEmpty();
-    }
-
-    @Test
-    @DisplayName("findByAge should return players with matching age")
-    void findByAge_returnsMatchingPlayers() {
-        List<Player> players = playerRepository.findByAge(21);
-
-        assertThat(players).hasSize(1);
-        assertThat(players.get(0).getId()).isEqualTo(pedri.getId());
-    }
-
-    @Test
-    @DisplayName("findByAge should return empty list when no player has the given age")
-    void findByAge_noMatch_returnsEmptyList() {
-        assertThat(playerRepository.findByAge(99)).isEmpty();
     }
 
     @Test

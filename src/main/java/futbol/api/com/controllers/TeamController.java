@@ -42,7 +42,7 @@ public class TeamController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<TeamResponse> getTeamByName(@PathVariable String name) {
-        TeamResponse response = teamService.getTeambyName(name);
+        TeamResponse response = teamService.getTeamByName(name);
         return ResponseEntity.ok(response);
     }
 

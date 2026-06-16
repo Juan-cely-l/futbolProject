@@ -122,7 +122,7 @@ class TeamControllerTest {
     @Test
     @DisplayName("GET /futbix/v1/teams/name/{name} -> 200 with matching team")
     void getTeamByName_returnsOk() {
-        when(teamService.getTeambyName("FC Barcelona")).thenReturn(teamResponse);
+        when(teamService.getTeamByName("FC Barcelona")).thenReturn(teamResponse);
 
         ResponseEntity<TeamResponse> response = controller.getTeamByName("FC Barcelona");
 
@@ -134,7 +134,7 @@ class TeamControllerTest {
     @Test
     @DisplayName("GET /futbix/v1/teams/name/{name} not found -> ResourceNotFoundException")
     void getTeamByName_notFound_throwsException() {
-        when(teamService.getTeambyName("NonExistent"))
+        when(teamService.getTeamByName("NonExistent"))
                 .thenThrow(new ResourceNotFoundException("Team not found with name: NonExistent"));
 
         org.junit.jupiter.api.Assertions.assertThrows(

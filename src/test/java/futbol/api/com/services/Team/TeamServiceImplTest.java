@@ -290,16 +290,16 @@ class TeamServiceImplTest {
     }
 
     // -----------------------------------------------------------------------
-    // getTeambyName
+    // getTeamByName
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("getTeambyName: returns TeamResponse when found")
-    void getTeambyName_whenFound_returnsTeamResponse() {
+    @DisplayName("getTeamByName: returns TeamResponse when found")
+    void getTeamByName_whenFound_returnsTeamResponse() {
         String teamName = "FC Barcelona";
         when(teamRepository.findTeamByNameIgnoreCase(teamName)).thenReturn(Optional.of(team));
 
-        TeamResponse result = teamService.getTeambyName(teamName);
+        TeamResponse result = teamService.getTeamByName(teamName);
 
         assertThat(result.getId()).isEqualTo(teamId);
         assertThat(result.getName()).isEqualTo(teamName);
@@ -308,12 +308,12 @@ class TeamServiceImplTest {
     }
 
     @Test
-    @DisplayName("getTeambyName: throws ResourceNotFoundException when not found")
-    void getTeambyName_whenNotFound_throwsException() {
+    @DisplayName("getTeamByName: throws ResourceNotFoundException when not found")
+    void getTeamByName_whenNotFound_throwsException() {
         String teamName = "NonExistent";
         when(teamRepository.findTeamByNameIgnoreCase(teamName)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> teamService.getTeambyName(teamName))
+        assertThatThrownBy(() -> teamService.getTeamByName(teamName))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(teamName);
     }

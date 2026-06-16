@@ -75,6 +75,10 @@ openspec/
 
 ### Claude AI ###
 .claude/
+CLAUDE.md
+AGENTS.md
+.agents/
+.codex/
 
 ### Docker ###
 .docker/
