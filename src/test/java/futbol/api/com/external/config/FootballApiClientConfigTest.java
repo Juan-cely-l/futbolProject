@@ -18,8 +18,6 @@ import static org.mockito.Mockito.when;
 class FootballApiClientConfigTest {
 
     @Mock
-    private FootballApiConfig config;
-    @Mock
     private ApiFootballClient apiFootballClient;
 
     private final FootballApiClientConfig clientConfig = new FootballApiClientConfig();
@@ -27,7 +25,8 @@ class FootballApiClientConfigTest {
     @Test
     @DisplayName("requestCounter: creates counter with daily limit from config")
     void requestCounter_createsWithLimit() {
-        when(config.dailyLimit()).thenReturn(500);
+        FootballApiConfig config = new FootballApiConfig(
+                "test-key", "test-host", "https://api.example.com", 2025, 2020, 2025, 500, java.util.List.of(39));
 
         RequestCounter counter = clientConfig.requestCounter(config);
 
@@ -37,8 +36,8 @@ class FootballApiClientConfigTest {
     @Test
     @DisplayName("footballRestClient: creates RestClient with config values")
     void footballRestClient_createsClient() {
-        when(config.baseUrl()).thenReturn("https://api.example.com");
-        when(config.apiKey()).thenReturn("test-key");
+        FootballApiConfig config = new FootballApiConfig(
+                "test-key", "test-host", "https://api.example.com", 2025, 2020, 2025, 500, java.util.List.of(39));
 
         var client = clientConfig.footballRestClient(config);
 

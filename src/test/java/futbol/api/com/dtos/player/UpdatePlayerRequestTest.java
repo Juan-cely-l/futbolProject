@@ -107,6 +107,72 @@ class UpdatePlayerRequestTest {
     }
 
     @Test
+    @DisplayName("Should fail when name is blank spaces")
+    void blankName() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setName("   ");
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("Should fail when name is longer than create contract")
+    void nameTooLong() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setName("a".repeat(51));
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("Should pass when name matches create contract maximum")
+    void nameAtCreateContractMaximum() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setName("a".repeat(50));
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("Should fail when teamName is blank")
+    void blankTeamName() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setTeamName("\t \n");
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("teamName"));
+    }
+
+    @Test
+    @DisplayName("Should fail when teamName exceeds create contract maximum")
+    void teamNameTooLong() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setTeamName("a".repeat(101));
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("teamName"));
+    }
+
+    @Test
+    @DisplayName("Should pass when teamName matches create contract maximum")
+    void teamNameAtCreateContractMaximum() {
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setTeamName("a".repeat(100));
+
+        Set<ConstraintViolation<UpdatePlayerRequest>> violations = validator.validate(request);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("teamName"));
+    }
+
+    @Test
     @DisplayName("Should pass with all valid fields")
     void allFieldsValid() {
         UpdatePlayerRequest request = new UpdatePlayerRequest();

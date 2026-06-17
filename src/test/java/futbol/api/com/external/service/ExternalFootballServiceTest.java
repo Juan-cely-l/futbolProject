@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -56,19 +55,19 @@ class ExternalFootballServiceTest {
     private PlayerRepository playerRepository;
 
     @Mock
-    private FootballApiConfig config;
-
-    @Mock
     private TransactionTemplate transactionTemplate;
 
     @Mock
     private RequestCounter requestCounter;
 
-    @InjectMocks
     private ExternalFootballService service;
+    private FootballApiConfig config;
 
     @BeforeEach
     void setUp() {
+        config = createConfig(2025, List.of(39, 140));
+        service = new ExternalFootballService(
+                apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
         ReflectionTestUtils.setField(service, "self", service);
         lenient().when(requestCounter.remaining()).thenReturn(100);
     }
@@ -76,7 +75,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: returns non-null UUID and stores progress in the map")
     void syncAll_returnsUuidAndStoresProgress() {
-        when(config.season()).thenReturn(2025);
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of());
 
         UUID syncId = service.syncAll(140);
@@ -100,7 +98,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: progress status is PROCESSING immediately after syncAll returns")
     void syncAll_progressIsProcessingInitially() {
-        when(config.season()).thenReturn(2025);
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of());
 
         UUID syncId = service.syncAll(140);
@@ -143,7 +140,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: recalculates team budget from squad value after processing")
     void syncAll_recalculatesBudgetFromSquadValue() {
-        when(config.season()).thenReturn(2025);
         TeamData teamData = new TeamData(1, "Arsenal", "England");
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of(teamData));
 
@@ -194,7 +190,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: team survives when player fetch fails (transaction split)")
     void syncAll_teamSurvivesPlayerFetchFailure() {
-        when(config.season()).thenReturn(2025);
         TeamData teamData = new TeamData(1, "Arsenal", "England");
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of(teamData));
 
@@ -239,7 +234,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: calls getTeamsByLeague only once per league (cached)")
     void syncAll_cachesTeamListBetweenEstimateAndProcess() {
-        when(config.season()).thenReturn(2025);
         TeamData teamData = new TeamData(1, "Arsenal", "England");
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of(teamData));
 
@@ -266,7 +260,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("syncAll: single team saves team and players")
     void syncTeams_singleTeam_savesTeamAndPlayers() {
-        when(config.season()).thenReturn(2025);
         TeamData teamData = new TeamData(5, "Test FC", "Testland");
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of(teamData));
 
@@ -306,7 +299,6 @@ class ExternalFootballServiceTest {
     @Test
     @DisplayName("processLeague: empty team list returns progress with zero teams")
     void processLeague_emptyTeamList_returnsResultWithZeroTeams() {
-        when(config.season()).thenReturn(2025);
         when(apiClient.getTeamsByLeague(any(), any())).thenReturn(List.of());
 
         UUID syncId = service.syncAll(78);
@@ -320,5 +312,17 @@ class ExternalFootballServiceTest {
         assertThat(progress.playersUpdated()).isZero();
         assertThat(progress.errors()).isEmpty();
         assertThat(progress.leagueIds()).containsExactly(78);
+    }
+
+    private static FootballApiConfig createConfig(Integer season, List<Integer> leagueIds) {
+        return new FootballApiConfig(
+                "test-key",
+                "test-host",
+                "https://api.example.com",
+                season,
+                2020,
+                2025,
+                500,
+                leagueIds);
     }
 }

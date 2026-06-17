@@ -18,12 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.BindingResult;
+import org.springframework.core.MethodParameter;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -148,19 +150,31 @@ class GlobalExceptionHandlerTest {
     @DisplayName("MethodArgumentNotValidException → 400 with fieldErrors")
     class ValidationTests {
 
-        @Mock
-        private MethodArgumentNotValidException exception;
+        private MethodArgumentNotValidException validationException(FieldError... fieldErrors) {
+            BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "playerRequest");
+            for (FieldError fieldError : fieldErrors) {
+                bindingResult.addError(fieldError);
+            }
 
-        @Mock
-        private BindingResult bindingResult;
+            try {
+                Method method = ValidationTests.class.getDeclaredMethod("sampleValidatedMethod", Object.class);
+                MethodParameter methodParameter = new MethodParameter(method, 0);
+                return new MethodArgumentNotValidException(methodParameter, bindingResult);
+            } catch (NoSuchMethodException exception) {
+                throw new IllegalStateException("Failed to build validation exception fixture", exception);
+            }
+        }
+
+        @SuppressWarnings("unused")
+        private void sampleValidatedMethod(Object request) {
+        }
 
         @Test
         @DisplayName("should return 400 with field errors")
         void handleValidation_returns400withFieldErrors() {
             FieldError nameError = new FieldError("playerRequest", "name", "Name must not be blank");
             FieldError ageError = new FieldError("playerRequest", "age", "Age must be between 16 and 45");
-            when(bindingResult.getFieldErrors()).thenReturn(List.of(nameError, ageError));
-            when(exception.getBindingResult()).thenReturn(bindingResult);
+            MethodArgumentNotValidException exception = validationException(nameError, ageError);
 
             ResponseEntity<Map<String, Object>> response = handler.handleValidation(exception);
 
@@ -188,8 +202,7 @@ class GlobalExceptionHandlerTest {
         @DisplayName("should use default message when getDefaultMessage is null")
         void handleValidation_nullDefaultMessage_usesFallback() {
             FieldError errorWithNullMessage = new FieldError("playerRequest", "position", null);
-            when(bindingResult.getFieldErrors()).thenReturn(List.of(errorWithNullMessage));
-            when(exception.getBindingResult()).thenReturn(bindingResult);
+            MethodArgumentNotValidException exception = validationException(errorWithNullMessage);
 
             ResponseEntity<Map<String, Object>> response = handler.handleValidation(exception);
 
@@ -204,8 +217,7 @@ class GlobalExceptionHandlerTest {
         @Test
         @DisplayName("should handle empty field errors list")
         void handleValidation_emptyFieldErrors_returnsEmptyList() {
-            when(bindingResult.getFieldErrors()).thenReturn(List.of());
-            when(exception.getBindingResult()).thenReturn(bindingResult);
+            MethodArgumentNotValidException exception = validationException();
 
             ResponseEntity<Map<String, Object>> response = handler.handleValidation(exception);
 

@@ -62,10 +62,76 @@ class UpdateTeamRequestTest {
     }
 
     @Test
+    @DisplayName("Should fail when name is blank")
+    void nameBlank() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setName("   ");
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("Should pass when name matches create contract maximum")
+    void nameAtCreateContractMaximum() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setName("a".repeat(100));
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
+    @DisplayName("Should fail when name exceeds create contract maximum")
+    void nameTooLong() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setName("a".repeat(101));
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("name"));
+    }
+
+    @Test
     @DisplayName("Should fail when city is too short")
     void cityTooShort() {
         UpdateTeamRequest request = new UpdateTeamRequest();
         request.setCity("X");
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("city"));
+    }
+
+    @Test
+    @DisplayName("Should fail when city is blank")
+    void cityBlank() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setCity("\t \n");
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("city"));
+    }
+
+    @Test
+    @DisplayName("Should pass when city matches create contract maximum")
+    void cityAtCreateContractMaximum() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setCity("a".repeat(100));
+
+        Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
+
+        assertThat(violations).noneMatch(v -> v.getPropertyPath().toString().equals("city"));
+    }
+
+    @Test
+    @DisplayName("Should fail when city exceeds create contract maximum")
+    void cityTooLong() {
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setCity("a".repeat(101));
 
         Set<ConstraintViolation<UpdateTeamRequest>> violations = validator.validate(request);
 

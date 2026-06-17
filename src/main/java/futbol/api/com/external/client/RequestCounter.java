@@ -20,11 +20,7 @@ public class RequestCounter {
     }
 
     public synchronized void increment() {
-        LocalDate today = LocalDate.now();
-        if (!today.equals(lastResetDate)) {
-            counter.set(0);
-            lastResetDate = today;
-        }
+        refreshIfNeeded();
         int current = counter.incrementAndGet();
         if (current >= dailyLimit - SAFETY_MARGIN) {
             throw new ExternalApiException(429,
@@ -32,19 +28,31 @@ public class RequestCounter {
         }
     }
 
-    public int getCount() {
+    public synchronized int getCount() {
+        refreshIfNeeded();
         return counter.get();
     }
 
-    public boolean isLimitReached() {
+    public synchronized boolean isLimitReached() {
+        refreshIfNeeded();
         return counter.get() >= dailyLimit - SAFETY_MARGIN;
     }
 
-    public int remaining() {
+    public synchronized int remaining() {
+        refreshIfNeeded();
         return (dailyLimit - SAFETY_MARGIN) - counter.get();
     }
 
-    public void reset() {
+    public synchronized void reset() {
         counter.set(0);
+        lastResetDate = LocalDate.now();
+    }
+
+    private void refreshIfNeeded() {
+        LocalDate today = LocalDate.now();
+        if (!today.equals(lastResetDate)) {
+            counter.set(0);
+            lastResetDate = today;
+        }
     }
 }

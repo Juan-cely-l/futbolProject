@@ -227,6 +227,42 @@ class PlayerServiceImplTest {
     }
 
     @Test
+    @DisplayName("updatePlayer: omitted name and teamName keep persisted values")
+    void updatePlayer_withOmittedStringFields_keepsPersistedValues() {
+        UUID pid = UUID.randomUUID();
+        Player existing = Player.builder()
+                .id(pid).name("lionel messi").goals(25).position(Position.FORWARD)
+                .age(33).assists(10).matches(30).valueMarket(120_000_000)
+                .team(team)
+                .build();
+
+        UpdatePlayerRequest request = new UpdatePlayerRequest();
+        request.setGoals(40);
+
+        when(playerRepository.findById(pid)).thenReturn(Optional.of(existing));
+
+        Player updated = Player.builder()
+                .id(pid).name("lionel messi").goals(40).position(Position.FORWARD)
+                .age(33).assists(10).matches(30).valueMarket(120_000_000)
+                .team(team)
+                .build();
+        when(playerRepository.save(any(Player.class))).thenReturn(updated);
+
+        PlayerResponse expected = PlayerResponse.builder()
+                .id(pid).name("lionel messi").goals(40).position(Position.FORWARD)
+                .age(33).assists(10).matches(30).valueMarket(120_000_000)
+                .teamName("fc barcelona")
+                .build();
+        when(playerMapper.mapPlayerToResponseDto(updated)).thenReturn(expected);
+
+        PlayerResponse result = playerService.updatePlayer(pid, request);
+
+        assertThat(result.getName()).isEqualTo("lionel messi");
+        assertThat(result.getTeamName()).isEqualTo("fc barcelona");
+        assertThat(result.getGoals()).isEqualTo(40);
+    }
+
+    @Test
     @DisplayName("updatePlayer: throws ResourceNotFoundException when player not found")
     void updatePlayer_whenPlayerNotFound_throwsException() {
         UUID id = UUID.randomUUID();

@@ -46,13 +46,9 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(bruteForceEntryPoint()))
             .addFilterBefore(rateLimitFilter, BasicAuthenticationFilter.class)
             .headers(headers -> headers
-                .httpStrictTransportSecurity(hsts -> hsts
-                    .includeSubDomains(true)
-                    .maxAgeInSeconds(31536000))
+                .defaultsDisabled()
                 .referrerPolicy(referrer -> referrer
                     .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'"))
                 .permissionsPolicy(permissions -> permissions
                     .policy("camera=(), microphone=(), geolocation=()"))
             );

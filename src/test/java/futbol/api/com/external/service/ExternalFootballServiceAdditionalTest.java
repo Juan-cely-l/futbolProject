@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -41,17 +40,18 @@ class ExternalFootballServiceAdditionalTest {
     @Mock
     private PlayerRepository playerRepository;
     @Mock
-    private FootballApiConfig config;
-    @Mock
     private TransactionTemplate transactionTemplate;
     @Mock
     private RequestCounter requestCounter;
 
-    @InjectMocks
     private ExternalFootballService service;
+    private FootballApiConfig config;
 
     @BeforeEach
     void setUp() {
+        config = createConfig(2025, List.of(39, 140), 2020, 2025);
+        service = new ExternalFootballService(
+                apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
         ReflectionTestUtils.setField(service, "self", service);
         lenient().when(requestCounter.remaining()).thenReturn(100);
     }
@@ -59,8 +59,6 @@ class ExternalFootballServiceAdditionalTest {
     @Test
     @DisplayName("getAvailableLeagues: returns league info from config IDs")
     void getAvailableLeagues_returnsLeagueInfos() {
-        when(config.leagueIds()).thenReturn(List.of(39, 140));
-
         List<LeagueInfo> leagues = service.getAvailableLeagues();
 
         assertThat(leagues).hasSize(2);
@@ -73,7 +71,10 @@ class ExternalFootballServiceAdditionalTest {
     @Test
     @DisplayName("getAvailableLeagues: returns fallback name for unknown league ID")
     void getAvailableLeagues_unknownLeague_fallbackName() {
-        when(config.leagueIds()).thenReturn(List.of(999));
+        config = createConfig(2025, List.of(999), 2020, 2025);
+        service = new ExternalFootballService(
+                apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
+        ReflectionTestUtils.setField(service, "self", service);
 
         List<LeagueInfo> leagues = service.getAvailableLeagues();
 
@@ -85,10 +86,6 @@ class ExternalFootballServiceAdditionalTest {
     @Test
     @DisplayName("getAvailableSeasons: returns seasons from config")
     void getAvailableSeasons_returnsSeasons() {
-        when(config.seasonMin()).thenReturn(2020);
-        when(config.seasonMax()).thenReturn(2025);
-        when(config.season()).thenReturn(2025);
-
         SeasonsResponse resp = service.getAvailableSeasons();
 
         assertThat(resp.minSeason()).isEqualTo(2020);
@@ -143,5 +140,17 @@ class ExternalFootballServiceAdditionalTest {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create test SyncStats", e);
         }
+    }
+
+    private static FootballApiConfig createConfig(Integer season, List<Integer> leagueIds, Integer seasonMin, Integer seasonMax) {
+        return new FootballApiConfig(
+                "test-key",
+                "test-host",
+                "https://api.example.com",
+                season,
+                seasonMin,
+                seasonMax,
+                500,
+                leagueIds);
     }
 }

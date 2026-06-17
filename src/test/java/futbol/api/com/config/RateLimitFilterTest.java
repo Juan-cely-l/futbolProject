@@ -79,16 +79,22 @@ class RateLimitFilterTest {
     }
 
     @Test
-    @DisplayName("X-Forwarded-For header is used when present")
-    void xForwardedFor_usedWhenPresent() throws Exception {
-        when(request.getHeader("X-Forwarded-For")).thenReturn("203.0.113.5");
+    @DisplayName("Without trusted proxies: ignores X-Forwarded-For and keys by remote address")
+    void xForwardedFor_withoutTrustedProxies_isIgnored() throws Exception {
+        HttpServletRequest req1 = mock(HttpServletRequest.class);
+        when(req1.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(req1.getHeader("X-Forwarded-For")).thenReturn("203.0.113.5");
+
+        HttpServletRequest req2 = mock(HttpServletRequest.class);
+        when(req2.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(req2.getHeader("X-Forwarded-For")).thenReturn("198.51.100.7");
 
         for (int i = 0; i < 100; i++) {
-            filter.doFilter(request, response, chain);
+            filter.doFilter(req1, response, chain);
         }
 
-        // 101st from same forwarded IP should be blocked
-        filter.doFilter(request, response, chain);
+        filter.doFilter(req2, response, chain);
+
         verify(response).setStatus(429);
     }
 }

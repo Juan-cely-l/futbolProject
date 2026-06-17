@@ -7,12 +7,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 public class UpdatePlayerRequest {
-    @Size(min=2,max=50)
+    @Size(min = 2, max = 50)
+    @Pattern(regexp = ".*\\S.*", message = "Player name must not be blank")
     private String name;
 
     @Min(0)
@@ -32,6 +31,8 @@ public class UpdatePlayerRequest {
     @Min(0)
     private Integer valueMarket;
 
+    @Size(max = 100, message = "Team name must be at most 100 characters")
+    @Pattern(regexp = ".*\\S.*", message = "Team name must not be blank")
     private String teamName;
 
     @Size(max = 500)

@@ -246,6 +246,30 @@ class TeamServiceImplTest {
     }
 
     @Test
+    @DisplayName("updateTeam: omitted name and city keep persisted values")
+    void updateTeam_withOmittedStringFields_keepsPersistedValues() {
+        UUID id = UUID.randomUUID();
+        Team existingTeam = Team.builder()
+                .id(id).name("FC Barcelona").city("Barcelona").budget(500_000_000L).build();
+
+        UpdateTeamRequest request = new UpdateTeamRequest();
+        request.setBudget(650_000_000L);
+
+        when(teamRepository.findById(id)).thenReturn(Optional.of(existingTeam));
+
+        Team updatedTeam = Team.builder()
+                .id(id).name("FC Barcelona").city("Barcelona").budget(650_000_000L)
+                .build();
+        when(teamRepository.save(any(Team.class))).thenReturn(updatedTeam);
+
+        TeamResponse result = teamService.updateTeam(id, request);
+
+        assertThat(result.getName()).isEqualTo("FC Barcelona");
+        assertThat(result.getCity()).isEqualTo("Barcelona");
+        assertThat(result.getBudget()).isEqualTo(650_000_000L);
+    }
+
+    @Test
     @DisplayName("updateTeam: throws ResourceNotFoundException when team not found")
     void updateTeam_whenTeamNotFound_throwsException() {
         UUID id = UUID.randomUUID();
