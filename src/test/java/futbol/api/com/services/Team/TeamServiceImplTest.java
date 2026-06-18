@@ -11,6 +11,7 @@ import futbol.api.com.models.Player;
 import futbol.api.com.models.Position;
 import futbol.api.com.models.Team;
 import futbol.api.com.repositories.PlayerRepository;
+import futbol.api.com.repositories.TeamSquadCountProjection;
 import futbol.api.com.repositories.TeamRepository;
 import futbol.api.com.services.Player.PlayerMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -354,12 +356,38 @@ class TeamServiceImplTest {
                 .build();
 
         when(teamRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(team, team2)));
+        when(playerRepository.countPlayersByTeamIds(anyCollection())).thenReturn(List.of());
 
         Page<TeamResponse> result = teamService.getAllTeams(0, 10, "name", "asc", null);
 
         assertThat(result).hasSize(2);
         assertThat(result).extracting(TeamResponse::getName)
                 .containsExactly("FC Barcelona", "Real Madrid");
+    }
+
+    @Test
+    @DisplayName("getAllTeams: uses grouped squad counts without per-team count calls")
+    void getAllTeams_withTeams_usesGroupedSquadCounts() {
+        UUID realMadridId = UUID.randomUUID();
+        Team team2 = Team.builder()
+                .id(realMadridId).name("Real Madrid").budget(400_000_000L).city("Madrid")
+                .build();
+
+        when(teamRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(team, team2)));
+        when(playerRepository.countPlayersByTeamIds(argThat(teamIds ->
+                teamIds instanceof Collection<?> ids
+                        && ids.contains(teamId)
+                        && ids.contains(realMadridId)
+        ))).thenReturn(List.of(
+                squadCount(teamId, 3),
+                squadCount(realMadridId, 5)
+        ));
+
+        Page<TeamResponse> result = teamService.getAllTeams(0, 10, "name", "asc", null);
+
+        assertThat(result).extracting(TeamResponse::getSquadCount)
+                .containsExactly(3, 5);
+        verify(playerRepository, never()).countByTeam_Id(any(UUID.class));
     }
 
     @Test
@@ -396,5 +424,19 @@ class TeamServiceImplTest {
                 .hasMessageContaining(teamId.toString());
 
         verify(teamRepository, never()).delete(any());
+    }
+
+    private static TeamSquadCountProjection squadCount(UUID teamId, long squadCount) {
+        return new TeamSquadCountProjection() {
+            @Override
+            public UUID getTeamId() {
+                return teamId;
+            }
+
+            @Override
+            public long getSquadCount() {
+                return squadCount;
+            }
+        };
     }
 }

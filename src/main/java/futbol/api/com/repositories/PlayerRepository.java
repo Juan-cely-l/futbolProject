@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,14 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
     boolean existsPlayerByNameAndAgeAndTeamName(String name, Integer age, String teamName);
 
     long countByTeam_Id(UUID teamId);
+
+    @Query("""
+            select p.team.id as teamId, count(p.id) as squadCount
+            from Player p
+            where p.team.id in :teamIds
+            group by p.team.id
+            """)
+    List<TeamSquadCountProjection> countPlayersByTeamIds(@Param("teamIds") Collection<UUID> teamIds);
 
     boolean existsByNameAndAgeAndTeamNameAndIdNot(String name, Integer age, String teamName, UUID id);
 }

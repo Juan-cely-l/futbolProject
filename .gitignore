@@ -72,6 +72,7 @@ coverage/
 PLAN_API_FOOTBALL.md
 prompt_plan.md
 openspec/
+lidr-specboot/
 
 ### Claude AI ###
 .claude/

@@ -9,6 +9,7 @@ import futbol.api.com.exceptions.ResourceAlreadyExistsException;
 import futbol.api.com.exceptions.ResourceNotFoundException;
 import futbol.api.com.models.Team;
 import futbol.api.com.repositories.PlayerRepository;
+import futbol.api.com.repositories.TeamSquadCountProjection;
 import futbol.api.com.repositories.TeamRepository;
 import futbol.api.com.services.Player.PlayerMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -133,11 +136,9 @@ public class TeamServiceImpl implements TeamService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         if (search != null && !search.isBlank()) {
-            return teamRepository.findByNameContainingIgnoreCase(search.trim(), pageable)
-                    .map(this::mapToResponseDto);
+            return mapTeamsWithSquadCounts(teamRepository.findByNameContainingIgnoreCase(search.trim(), pageable));
         }
-        return teamRepository.findAll(pageable)
-                .map(this::mapToResponseDto);
+        return mapTeamsWithSquadCounts(teamRepository.findAll(pageable));
     }
 
     @Override
@@ -156,6 +157,33 @@ public class TeamServiceImpl implements TeamService {
                 .budget(team.getBudget())
                 .city(team.getCity())
                 .squadCount((int) playerRepository.countByTeam_Id(team.getId()))
+                .createdAt(team.getCreatedAt())
+                .build();
+    }
+
+    private Page<TeamResponse> mapTeamsWithSquadCounts(Page<Team> teams) {
+        if (teams.isEmpty()) {
+            return teams.map(team -> mapToResponseDto(team, 0));
+        }
+        List<UUID> teamIds = teams.stream()
+                .map(Team::getId)
+                .toList();
+        Map<UUID, Long> squadCounts = playerRepository.countPlayersByTeamIds(teamIds).stream()
+                .collect(Collectors.toMap(
+                        TeamSquadCountProjection::getTeamId,
+                        TeamSquadCountProjection::getSquadCount
+                ));
+
+        return teams.map(team -> mapToResponseDto(team, squadCounts.getOrDefault(team.getId(), 0L)));
+    }
+
+    private TeamResponse mapToResponseDto(Team team, long squadCount) {
+        return TeamResponse.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .budget(team.getBudget())
+                .city(team.getCity())
+                .squadCount(Math.toIntExact(squadCount))
                 .createdAt(team.getCreatedAt())
                 .build();
     }
