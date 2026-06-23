@@ -1,0 +1,772 @@
+openapi: 3.1.0
+info:
+  title: Futbix Sync API
+  version: 0.1.0
+  summary: Public REST contract for the external football sync workflow.
+  description: |
+    OpenAPI contract for the Fase D sync boundary.
+
+    The sync implementation can be refactored internally, but clients should be
+    able to rely on the paths, payload shapes, errors, and examples documented
+    here.
+
+    AsyncAPI is not defined for this story because Futbix does not expose a
+    public broker, WebSocket, SSE, or event channel for sync progress. The
+    externally visible asynchronous model is REST job creation plus polling.
+  x-story:
+    id: document-sync-api-contract
+    relatedPhase: phase-d-sync-service-refactor
+    scope:
+      - Document the public sync API contract.
+      - Preserve current REST paths while sync internals are refactored later.
+      - Provide request, response, error, and example payloads.
+    nonGoals:
+      - No business logic implementation.
+      - No Java controller or service change.
+      - No new public messaging channel.
+  x-canonical-contract:
+    canonical: true
+    reason: "This file is the project-level public Sync API contract. OpenSpec change-local OpenAPI files must stay compatible with these public paths, responses, and schemas."
+  x-change: phase-d-sync-service-refactor
+  x-acceptance-scenario-map:
+    sync-transaction-boundary:
+      - scenario: API player fetch fails before transaction starts
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200 PARTIAL"
+        note: "The no-transaction assertion is internal and must be tested below the API layer."
+      - scenario: Player persistence fails after successful API fetch
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200 PARTIAL"
+    sync-service-decomposition:
+      - scenario: Sync start contract remains stable
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+      - scenario: Concurrent sync rejection remains stable
+        operations:
+          - "POST /futbix/v1/sync -> 409"
+      - scenario: Sync progress contract remains stable
+        operations:
+          - "GET /futbix/v1/sync/{syncId} -> 200"
+      - scenario: Unknown sync progress remains not found
+        operations:
+          - "GET /futbix/v1/sync/{syncId} -> 404"
+      - scenario: League failure records partial progress
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200 PARTIAL"
+    sync-team-limit-coverage:
+      - scenario: maxTeams smaller than league team count limits processing
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200"
+      - scenario: maxTeams null processes all teams
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200"
+      - scenario: Estimate fallback fetches fresh teams with maxTeams
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200"
+  x-asyncapi-decision:
+    applicable: false
+    reason: "Sync progress is exposed through REST polling, not through publish/subscribe messaging."
+servers:
+  - url: http://localhost:8080
+    description: Local backend
+  - url: http://localhost
+    description: Local frontend or reverse-proxy origin
+tags:
+  - name: Sync
+    description: External football data synchronization.
+security:
+  - basicAuth: []
+paths:
+  /futbix/v1/sync:
+    post:
+      tags:
+        - Sync
+      operationId: startSync
+      summary: Start a sync job.
+      description: |
+        Starts a background sync and returns a `syncId` that clients use to poll
+        progress. Only one sync job can run at a time.
+
+        This mutating operation requires HTTP Basic authentication.
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncRequest"
+            examples:
+              limitedLeague:
+                summary: Sync a limited number of teams from one league.
+                value:
+                  leagueIds:
+                    - 140
+                  season: 2024
+                  maxTeams: 2
+              multipleLeaguesNoLimit:
+                summary: Sync multiple leagues without limiting team count.
+                value:
+                  leagueIds:
+                    - 39
+                    - 140
+                  season: 2025
+                  maxTeams: null
+              defaultLeague:
+                summary: Use backend default league when leagueIds is omitted.
+                value:
+                  season: 2025
+                  maxTeams: 1
+      responses:
+        "202":
+          description: Sync job accepted and started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartSyncResponse"
+              examples:
+                accepted:
+                  value:
+                    syncId: "2fd8ad50-661f-4d7d-8ffc-bb7c5f3bbd12"
+                    status: PROCESSING
+                    message: "Sync started for leagues [140] season 2024"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: A sync job is already running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                syncInProgress:
+                  value:
+                    timestamp: "2026-06-18T10:15:30"
+                    status: 409
+                    error: Conflict
+                    message: "A sync is already in progress. Wait for it to complete before starting another."
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /futbix/v1/sync/{syncId}:
+    get:
+      tags:
+        - Sync
+      operationId: getSyncProgress
+      summary: Get sync job progress.
+      description: |
+        Returns current or final progress for a sync job. While a job is still
+        processing, `teams` is `null`. After completion, `teams` contains the
+        final result snapshot.
+      security: []
+      parameters:
+        - name: syncId
+          in: path
+          required: true
+          description: Sync job UUID returned by `POST /futbix/v1/sync`.
+          schema:
+            type: string
+            format: uuid
+          example: "2fd8ad50-661f-4d7d-8ffc-bb7c5f3bbd12"
+      responses:
+        "200":
+          description: Sync progress found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncProgress"
+              examples:
+                processing:
+                  summary: Job still running.
+                  value:
+                    status: PROCESSING
+                    leagueIds:
+                      - 140
+                    totalLeagues: 1
+                    processedLeagues: 0
+                    totalTeams: 2
+                    processedTeams: 1
+                    playersCreated: 23
+                    playersUpdated: 0
+                    season: 2024
+                    errors: []
+                    startedAt: "2026-06-18T10:15:30"
+                    completedAt: null
+                    teams: null
+                success:
+                  summary: Job completed successfully.
+                  value:
+                    status: SUCCESS
+                    leagueIds:
+                      - 140
+                    totalLeagues: 1
+                    processedLeagues: 1
+                    totalTeams: 1
+                    processedTeams: 1
+                    playersCreated: 2
+                    playersUpdated: 0
+                    season: 2024
+                    errors: []
+                    startedAt: "2026-06-18T10:15:30"
+                    completedAt: "2026-06-18T10:16:10"
+                    teams:
+                      - name: "real madrid"
+                        country: Spain
+                        created: true
+                        updated: false
+                        players:
+                          - name: "vinicius junior"
+                            position: FORWARD
+                            age: 24
+                            photo: "https://media.api-sports.io/football/players/762.png"
+                            goals: 15
+                            assists: 6
+                            matches: 28
+                            valueMarket: 120000000
+                          - name: "jude bellingham"
+                            position: MIDFIELDER
+                            age: 21
+                            photo: "https://media.api-sports.io/football/players/2277.png"
+                            goals: 10
+                            assists: 7
+                            matches: 30
+                            valueMarket: 110000000
+                partial:
+                  summary: Job completed with recoverable team-level errors.
+                  value:
+                    status: PARTIAL
+                    leagueIds:
+                      - 39
+                    totalLeagues: 1
+                    processedLeagues: 1
+                    totalTeams: 2
+                    processedTeams: 2
+                    playersCreated: 20
+                    playersUpdated: 1
+                    season: 2025
+                    errors:
+                      - "arsenal: External API timeout"
+                    startedAt: "2026-06-18T10:15:30"
+                    completedAt: "2026-06-18T10:16:45"
+                    teams: []
+        "400":
+          description: Invalid UUID path value.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidUuid:
+                  value:
+                    timestamp: "2026-06-18T10:15:30"
+                    status: 400
+                    error: Bad Request
+                    message: "Invalid path parameter: syncId must be a UUID."
+        "404":
+          description: No sync progress exists for the requested ID.
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /futbix/v1/sync/leagues:
+    get:
+      tags:
+        - Sync
+      operationId: getAvailableLeagues
+      summary: List configured sync leagues.
+      description: Returns the league IDs and display names configured for sync.
+      security: []
+      responses:
+        "200":
+          description: Available sync leagues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeagueInfo"
+              examples:
+                configuredLeagues:
+                  value:
+                    - id: 39
+                      name: Premier League
+                    - id: 140
+                      name: La Liga
+                    - id: 135
+                      name: Serie A
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /futbix/v1/sync/seasons:
+    get:
+      tags:
+        - Sync
+      operationId: getAvailableSeasons
+      summary: Get configured sync seasons.
+      description: Returns supported minimum, maximum, and current sync seasons.
+      security: []
+      responses:
+        "200":
+          description: Available sync season range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonsResponse"
+              examples:
+                configuredSeasons:
+                  value:
+                    minSeason: 2020
+                    maxSeason: 2025
+                    currentSeason: 2025
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic authentication for mutating sync operations.
+  responses:
+    BadRequest:
+      description: Malformed JSON, unsupported field type, or invalid request values.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - $ref: "#/components/schemas/ValidationErrorResponse"
+          examples:
+            malformedJson:
+              summary: JSON syntax or type mismatch.
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 400
+                error: Bad Request
+                message: "Malformed request body. Check JSON syntax and field types."
+            validationFailed:
+              summary: Target validation contract for invalid sync request values.
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 400
+                error: Validation Failed
+                fieldErrors:
+                  - field: maxTeams
+                    message: "must be greater than or equal to 1"
+                  - field: leagueIds
+                    message: "must contain at least one league ID when provided"
+    Unauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthErrorResponse"
+          examples:
+            missingCredentials:
+              value:
+                error: Authentication required
+    Forbidden:
+      description: Authenticated client is not allowed to perform the operation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            forbidden:
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 403
+                error: Forbidden
+                message: "You do not have permission to perform this action."
+    MethodNotAllowed:
+      description: HTTP method is not supported for this endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            methodNotAllowed:
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 405
+                error: Method Not Allowed
+                message: "This endpoint does not support the requested HTTP method."
+    TooManyRequests:
+      description: Request rate limit, authentication brute-force limit, or upstream API quota was exceeded.
+      x-current-behavior: "General request rate limiting may return 429 with Retry-After and an empty body; auth and upstream quota failures return JSON."
+      headers:
+        Retry-After:
+          description: Seconds until the client can retry. Present for general request rate limiting.
+          schema:
+            type: integer
+            minimum: 1
+          example: 42
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - $ref: "#/components/schemas/AuthErrorResponse"
+          examples:
+            authRateLimit:
+              summary: Too many failed authentication attempts.
+              value:
+                error: "Too many failed authentication attempts. Try again later."
+            upstreamQuota:
+              summary: External API rate limit or quota failure.
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 429
+                error: Too Many Requests
+                message: "External service returned an error."
+    InternalServerError:
+      description: Unexpected server-side failure.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            unexpected:
+              value:
+                timestamp: "2026-06-18T10:15:30"
+                status: 500
+                error: Internal Server Error
+                message: "An unexpected error occurred"
+  schemas:
+    SyncRequest:
+      type: object
+      additionalProperties: false
+      description: Request used to start a sync job.
+      properties:
+        leagueIds:
+          type:
+            - array
+            - "null"
+          description: |
+            League IDs to sync. If omitted or null, the controller uses the
+            backend default league list for this operation. If provided, the
+            target validation contract requires at least one league ID.
+          minItems: 1
+          items:
+            type: integer
+            format: int32
+            minimum: 1
+          examples:
+            - [140]
+            - [39, 140]
+        season:
+          type:
+            - integer
+            - "null"
+          format: int32
+          description: Football season year to sync.
+          minimum: 1900
+          maximum: 2100
+          examples:
+            - 2025
+        maxTeams:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 1
+          description: Optional per-league team cap. Null or omission means no limit.
+          examples:
+            - 2
+            - 20
+            - null
+    StartSyncResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - syncId
+        - status
+        - message
+      properties:
+        syncId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          const: PROCESSING
+        message:
+          type: string
+    SyncProgress:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - leagueIds
+        - totalLeagues
+        - processedLeagues
+        - totalTeams
+        - processedTeams
+        - playersCreated
+        - playersUpdated
+        - season
+        - errors
+        - startedAt
+        - completedAt
+        - teams
+      properties:
+        status:
+          $ref: "#/components/schemas/SyncStatus"
+        leagueIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        totalLeagues:
+          type: integer
+          format: int32
+          minimum: 0
+        processedLeagues:
+          type: integer
+          format: int32
+          minimum: 0
+        totalTeams:
+          type: integer
+          format: int32
+          minimum: 0
+        processedTeams:
+          type: integer
+          format: int32
+          minimum: 0
+        playersCreated:
+          type: integer
+          format: int32
+          minimum: 0
+        playersUpdated:
+          type: integer
+          format: int32
+          minimum: 0
+        season:
+          type:
+            - integer
+            - "null"
+          format: int32
+        errors:
+          type: array
+          items:
+            type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        teams:
+          type:
+            - array
+            - "null"
+          description: Null while processing; populated after final status.
+          items:
+            $ref: "#/components/schemas/SyncTeamResult"
+    SyncStatus:
+      type: string
+      enum:
+        - PROCESSING
+        - SUCCESS
+        - PARTIAL
+        - FAILED
+    SyncTeamResult:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - country
+        - created
+        - updated
+        - players
+      properties:
+        name:
+          type: string
+          examples:
+            - "real madrid"
+        country:
+          type:
+            - string
+            - "null"
+          examples:
+            - Spain
+        created:
+          type: boolean
+        updated:
+          type: boolean
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncPlayerResult"
+    SyncPlayerResult:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - position
+        - age
+        - photo
+        - goals
+        - assists
+        - matches
+        - valueMarket
+      properties:
+        name:
+          type: string
+          examples:
+            - "vinicius junior"
+        position:
+          type:
+            - string
+            - "null"
+          enum:
+            - GOALKEEPER
+            - DEFENDER
+            - MIDFIELDER
+            - FORWARD
+            - null
+        age:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 0
+        photo:
+          type:
+            - string
+            - "null"
+          format: uri
+        goals:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 0
+        assists:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 0
+        matches:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 0
+        valueMarket:
+          type:
+            - integer
+            - "null"
+          format: int32
+          minimum: 0
+    LeagueInfo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    SeasonsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - minSeason
+        - maxSeason
+        - currentSeason
+      properties:
+        minSeason:
+          type: integer
+          format: int32
+        maxSeason:
+          type: integer
+          format: int32
+        currentSeason:
+          type: integer
+          format: int32
+    ErrorResponse:
+      type: object
+      additionalProperties: true
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      required:
+        - timestamp
+        - status
+        - error
+        - fieldErrors
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+          const: 400
+        error:
+          type: string
+          const: Validation Failed
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+    AuthErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string

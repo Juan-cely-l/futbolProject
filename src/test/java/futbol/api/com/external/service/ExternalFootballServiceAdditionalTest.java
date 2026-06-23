@@ -22,6 +22,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
@@ -52,7 +53,6 @@ class ExternalFootballServiceAdditionalTest {
         config = createConfig(2025, List.of(39, 140), 2020, 2025);
         service = new ExternalFootballService(
                 apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
-        ReflectionTestUtils.setField(service, "self", service);
         lenient().when(requestCounter.remaining()).thenReturn(100);
     }
 
@@ -74,7 +74,6 @@ class ExternalFootballServiceAdditionalTest {
         config = createConfig(2025, List.of(999), 2020, 2025);
         service = new ExternalFootballService(
                 apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
-        ReflectionTestUtils.setField(service, "self", service);
 
         List<LeagueInfo> leagues = service.getAvailableLeagues();
 
@@ -117,29 +116,18 @@ class ExternalFootballServiceAdditionalTest {
 
     private UUID addProgressEntry(LocalDateTime completedAt) {
         @SuppressWarnings("unchecked")
-        var progressMap = (java.util.concurrent.ConcurrentHashMap<UUID, Object>)
-                ReflectionTestUtils.getField(service, "progressMap");
+        ConcurrentHashMap<UUID, SyncProgressState> progressMap = (ConcurrentHashMap<UUID, SyncProgressState>)
+                ReflectionTestUtils.getField(orchestrator(), "progressMap");
         UUID id = UUID.randomUUID();
-        Object stats = buildSyncStats(completedAt);
-        progressMap.put(id, stats);
+        SyncProgressState state = new SyncProgressState(List.of(39), 2025);
+        state.complete();
+        ReflectionTestUtils.setField(state, "completedAt", completedAt);
+        progressMap.put(id, state);
         return id;
     }
 
-    private Object buildSyncStats(LocalDateTime completedAt) {
-        try {
-            var statsClass = Class.forName(
-                    "futbol.api.com.external.service.ExternalFootballService$SyncStats");
-            var ctor = statsClass.getDeclaredConstructors()[0];
-            ctor.setAccessible(true);
-            Object stats = ctor.newInstance(List.of(39), 2025);
-            ReflectionTestUtils.setField(stats, "completedAt", completedAt);
-            // Also set status to SUCCESS so getProgress builds the result properly
-            ReflectionTestUtils.setField(stats, "status",
-                    futbol.api.com.external.dto.Status.SUCCESS);
-            return stats;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create test SyncStats", e);
-        }
+    private SyncOrchestrator orchestrator() {
+        return (SyncOrchestrator) ReflectionTestUtils.getField(service, "orchestrator");
     }
 
     private static FootballApiConfig createConfig(Integer season, List<Integer> leagueIds, Integer seasonMin, Integer seasonMax) {

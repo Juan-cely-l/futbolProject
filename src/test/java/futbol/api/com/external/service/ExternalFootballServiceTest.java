@@ -4,6 +4,7 @@ import futbol.api.com.external.FootballApiProvider;
 import futbol.api.com.external.client.RequestCounter;
 import futbol.api.com.external.config.FootballApiConfig;
 import futbol.api.com.external.dto.Status;
+import futbol.api.com.external.dto.SyncInProgressException;
 import futbol.api.com.external.dto.SyncProgress;
 import futbol.api.com.external.dto.player.PlayerInfo;
 import futbol.api.com.external.dto.team.TeamData;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -30,10 +30,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +70,6 @@ class ExternalFootballServiceTest {
         config = createConfig(2025, List.of(39, 140));
         service = new ExternalFootballService(
                 apiClient, mapper, teamRepository, playerRepository, config, transactionTemplate, requestCounter);
-        ReflectionTestUtils.setField(service, "self", service);
         lenient().when(requestCounter.remaining()).thenReturn(100);
     }
 
@@ -117,6 +118,20 @@ class ExternalFootballServiceTest {
         SyncProgress progress = service.getProgress(syncId);
         assertThat(progress.leagueIds()).containsExactly(78, 39);
         assertThat(progress.season()).isEqualTo(2024);
+    }
+
+    @Test
+    @DisplayName("syncAll: rejects a second start while a sync is in progress")
+    void syncAll_whenSyncAlreadyInProgress_throwsSyncInProgressException() {
+        SyncOrchestrator stalledOrchestrator = mock(SyncOrchestrator.class);
+        ExternalFootballService facade = new ExternalFootballService(config, stalledOrchestrator);
+
+        UUID syncId = facade.syncAll(List.of(39), 2025, null);
+
+        assertThat(syncId).isNotNull();
+        assertThatThrownBy(() -> facade.syncAll(List.of(140), 2025, null))
+                .isInstanceOf(SyncInProgressException.class)
+                .hasMessageContaining("already in progress");
     }
 
     @Test
@@ -209,13 +224,6 @@ class ExternalFootballServiceTest {
 
         when(playerRepository.findPlayersByTeam_Name("arsenal")).thenReturn(List.of());
 
-        // Execute transaction callback synchronously so the exception is caught
-        doAnswer(inv -> {
-            Consumer<TransactionStatus> action = inv.getArgument(0);
-            action.accept(null);
-            return null;
-        }).when(transactionTemplate).executeWithoutResult(any());
-
         UUID syncId = service.syncAll(39);
 
         SyncProgress progress = service.getProgress(syncId);
@@ -229,6 +237,7 @@ class ExternalFootballServiceTest {
         assertThat(capturedTeam[0]).isNotNull();
         assertThat(capturedTeam[0].getName()).isEqualTo("arsenal");
         assertThat(capturedTeam[0].getBudget()).isEqualTo(5_000_000L); // minimum budget
+        verify(transactionTemplate, never()).executeWithoutResult(any());
     }
 
     @Test
@@ -255,6 +264,38 @@ class ExternalFootballServiceTest {
 
         // Only one call: estimate phase caches the result, processLeague reuses it
         verify(apiClient, times(1)).getTeamsByLeague(any(), any());
+    }
+
+    @Test
+    @DisplayName("syncAll: omitted maxTeams processes all provider teams")
+    void syncAll_omittedMaxTeams_processesAllProviderTeams() {
+        TeamData arsenal = new TeamData(1, "Arsenal", "England");
+        TeamData chelsea = new TeamData(2, "Chelsea", "England");
+        when(apiClient.getTeamsByLeague(39, 2025)).thenReturn(List.of(arsenal, chelsea));
+
+        when(mapper.toTeamInfo(arsenal)).thenReturn(new TeamInfo("arsenal", "England"));
+        when(mapper.toTeamInfo(chelsea)).thenReturn(new TeamInfo("chelsea", "England"));
+        when(teamRepository.findTeamByNameIgnoreCase("arsenal")).thenReturn(java.util.Optional.empty());
+        when(teamRepository.findTeamByNameIgnoreCase("chelsea")).thenReturn(java.util.Optional.empty());
+        when(teamRepository.save(any(Team.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(apiClient.getPlayersByTeam(1, 2025, 39)).thenReturn(List.of());
+        when(apiClient.getPlayersByTeam(2, 2025, 39)).thenReturn(List.of());
+        when(playerRepository.findPlayersByTeam_Name("arsenal")).thenReturn(List.of());
+        when(playerRepository.findPlayersByTeam_Name("chelsea")).thenReturn(List.of());
+
+        doAnswer(inv -> {
+            Consumer<TransactionStatus> action = inv.getArgument(0);
+            action.accept(null);
+            return null;
+        }).when(transactionTemplate).executeWithoutResult(any());
+
+        UUID syncId = service.syncAll(39);
+
+        SyncProgress progress = service.getProgress(syncId);
+        assertThat(progress.totalTeams()).isEqualTo(2);
+        assertThat(progress.processedTeams()).isEqualTo(2);
+        verify(apiClient).getPlayersByTeam(1, 2025, 39);
+        verify(apiClient).getPlayersByTeam(2, 2025, 39);
     }
 
     @Test
