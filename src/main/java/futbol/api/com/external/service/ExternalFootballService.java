@@ -5,12 +5,14 @@ import futbol.api.com.external.client.RequestCounter;
 import futbol.api.com.external.config.FootballApiConfig;
 import futbol.api.com.external.dto.LeagueInfo;
 import futbol.api.com.external.dto.SeasonsResponse;
+import futbol.api.com.external.dto.SyncAdmissionRejectedException;
 import futbol.api.com.external.dto.SyncInProgressException;
 import futbol.api.com.external.dto.SyncProgress;
 import futbol.api.com.external.mapper.FootballDataMapper;
 import futbol.api.com.repositories.PlayerRepository;
 import futbol.api.com.repositories.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -56,7 +58,18 @@ public class ExternalFootballService {
             throw new SyncInProgressException("A sync is already in progress. Wait for it to complete before starting another.");
         }
         UUID syncId = UUID.randomUUID();
-        orchestrator.executeSync(syncId, leagueIds, season, maxTeams, () -> syncInProgress.set(false));
+        try {
+            orchestrator.executeSync(syncId, leagueIds, season, maxTeams, () -> syncInProgress.set(false));
+        } catch (TaskRejectedException e) {
+            syncInProgress.set(false);
+            throw new SyncAdmissionRejectedException(
+                    "Sync could not be started: the sync scheduler is temporarily unavailable. Retry shortly.", e);
+        } catch (RuntimeException e) {
+            // Release the reservation on ANY delegation failure so a stuck in-progress flag
+            // never blocks subsequent syncs (design.md: "the permit is released whenever delegation fails").
+            syncInProgress.set(false);
+            throw e;
+        }
         return syncId;
     }
 

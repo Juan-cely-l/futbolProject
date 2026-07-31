@@ -39,7 +39,7 @@ final class SyncProgressState {
     }
 
     void apply(LeagueProcessingResult result) {
-        totalTeams = result.totalTeams();
+        totalTeams += result.totalTeams();
         processedTeams.addAndGet(result.processedTeams());
         playersCreated.addAndGet(result.playersCreated());
         playersUpdated.addAndGet(result.playersUpdated());

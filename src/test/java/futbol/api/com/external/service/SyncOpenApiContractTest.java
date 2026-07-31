@@ -25,7 +25,7 @@ class SyncOpenApiContractTest {
         Map<String, Object> postSync = operation(doc, "/futbix/v1/sync", "post");
         Map<String, Object> responses = map(postSync.get("responses"));
 
-        assertThat(responses).containsKeys("202", "409");
+        assertThat(responses).containsKeys("202", "409", "503");
     }
 
     @Test

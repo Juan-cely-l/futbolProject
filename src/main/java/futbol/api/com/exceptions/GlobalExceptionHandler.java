@@ -3,6 +3,7 @@ package futbol.api.com.exceptions;
 import futbol.api.com.exceptions.ExternalApiException;
 import futbol.api.com.exceptions.ResourceAlreadyExistsException;
 import futbol.api.com.exceptions.ResourceNotFoundException;
+import futbol.api.com.external.dto.SyncAdmissionRejectedException;
 import futbol.api.com.external.dto.SyncInProgressException;
 
 import org.slf4j.Logger;
@@ -56,6 +57,17 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "status", 409,
                 "error", "Conflict",
+                "message", exception.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(SyncAdmissionRejectedException.class)
+    public ResponseEntity<Map<String, Object>> handleSyncAdmissionRejected(SyncAdmissionRejectedException exception) {
+        log.warn("Sync scheduler unavailable: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", 503,
+                "error", "Service Unavailable",
                 "message", exception.getMessage()
         ));
     }

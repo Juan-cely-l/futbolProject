@@ -3,6 +3,7 @@ package futbol.api.com.controllers.external;
 import futbol.api.com.external.dto.LeagueInfo;
 import futbol.api.com.external.dto.SeasonsResponse;
 import futbol.api.com.external.dto.Status;
+import futbol.api.com.external.dto.SyncAdmissionRejectedException;
 import futbol.api.com.external.dto.SyncProgress;
 import futbol.api.com.external.dto.SyncRequest;
 import futbol.api.com.external.dto.SyncTeamResult;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +67,18 @@ class SyncControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().get("status")).isEqualTo("PROCESSING");
+    }
+
+    @Test
+    @DisplayName("POST /futbix/v1/sync when executor rejects -> propagates SyncAdmissionRejectedException (no 202/syncId)")
+    void startSync_whenExecutorRejects_propagatesException() {
+        SyncRequest request = new SyncRequest(List.of(140), 2024, null);
+        when(syncService.syncAll(request.leagueIds(), request.season(), request.maxTeams()))
+                .thenThrow(new SyncAdmissionRejectedException(
+                        "Sync could not be started: the sync scheduler is temporarily unavailable. Retry shortly."));
+
+        assertThatThrownBy(() -> controller.startSync(request))
+                .isInstanceOf(SyncAdmissionRejectedException.class);
     }
 
     // -----------------------------------------------------------------------

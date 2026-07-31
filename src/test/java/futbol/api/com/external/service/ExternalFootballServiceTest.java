@@ -4,6 +4,7 @@ import futbol.api.com.external.FootballApiProvider;
 import futbol.api.com.external.client.RequestCounter;
 import futbol.api.com.external.config.FootballApiConfig;
 import futbol.api.com.external.dto.Status;
+import futbol.api.com.external.dto.SyncAdmissionRejectedException;
 import futbol.api.com.external.dto.SyncInProgressException;
 import futbol.api.com.external.dto.SyncProgress;
 import futbol.api.com.external.dto.player.PlayerInfo;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -132,6 +134,83 @@ class ExternalFootballServiceTest {
         assertThatThrownBy(() -> facade.syncAll(List.of(140), 2025, null))
                 .isInstanceOf(SyncInProgressException.class)
                 .hasMessageContaining("already in progress");
+    }
+
+    @Test
+    @DisplayName("syncAll: executor rejection releases reservation and surfaces retryable unavailability")
+    void syncAll_executorRejects_releasesReservation() {
+        SyncOrchestrator rejectingOrchestrator = mock(SyncOrchestrator.class);
+        when(rejectingOrchestrator.executeSync(any(), any(), any(), any(), any()))
+                .thenThrow(new TaskRejectedException("executor queue full"));
+        ExternalFootballService facade = new ExternalFootballService(config, rejectingOrchestrator);
+
+        assertThatThrownBy(() -> facade.syncAll(List.of(39), 2025, null))
+                .isInstanceOf(SyncAdmissionRejectedException.class)
+                .hasMessageContaining("temporarily unavailable");
+
+        // Reservation released: a retry must surface rejection again, not an in-progress conflict.
+        assertThatThrownBy(() -> facade.syncAll(List.of(39), 2025, null))
+                .isInstanceOf(SyncAdmissionRejectedException.class)
+                .isNotInstanceOf(SyncInProgressException.class);
+    }
+
+    @Test
+    @DisplayName("syncAll: generic delegation failure releases reservation and rethrows")
+    void syncAll_genericDelegationFailure_releasesReservation() {
+        SyncOrchestrator failingOrchestrator = mock(SyncOrchestrator.class);
+        when(failingOrchestrator.executeSync(any(), any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException("executor bean unavailable"));
+        ExternalFootballService facade = new ExternalFootballService(config, failingOrchestrator);
+
+        assertThatThrownBy(() -> facade.syncAll(List.of(39), 2025, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("executor bean unavailable");
+
+        // Reservation released: a retry must surface the same delegation failure,
+        // not an in-progress conflict (which would leave the reservation stuck forever).
+        assertThatThrownBy(() -> facade.syncAll(List.of(39), 2025, null))
+                .isInstanceOf(IllegalStateException.class)
+                .isNotInstanceOf(SyncInProgressException.class);
+    }
+
+    @Test
+    @DisplayName("syncAll: a new sync can start after executor rejection")
+    void syncAll_afterExecutorRejection_canStartNewSync() {
+        SyncOrchestrator flakyOrchestrator = mock(SyncOrchestrator.class);
+        when(flakyOrchestrator.executeSync(any(), any(), any(), any(), any()))
+                .thenThrow(new TaskRejectedException("queue full"))
+                .thenAnswer(inv -> {
+                    Runnable onComplete = inv.getArgument(4);
+                    onComplete.run();
+                    return null;
+                });
+        ExternalFootballService facade = new ExternalFootballService(config, flakyOrchestrator);
+
+        assertThatThrownBy(() -> facade.syncAll(List.of(39), 2025, null))
+                .isInstanceOf(SyncAdmissionRejectedException.class);
+
+        UUID retried = facade.syncAll(List.of(140), 2025, null);
+
+        assertThat(retried).isNotNull();
+    }
+
+    @Test
+    @DisplayName("syncAll: terminal sync outcome releases admission and allows a new start")
+    void syncAll_afterCompletedSync_allowsNewStart() {
+        SyncOrchestrator completingOrchestrator = mock(SyncOrchestrator.class);
+        doAnswer(inv -> {
+            Runnable onComplete = inv.getArgument(4);
+            onComplete.run();
+            return null;
+        }).when(completingOrchestrator).executeSync(any(), any(), any(), any(), any());
+        ExternalFootballService facade = new ExternalFootballService(config, completingOrchestrator);
+
+        UUID first = facade.syncAll(List.of(39), 2025, null);
+        UUID second = facade.syncAll(List.of(140), 2025, null);
+
+        assertThat(first).isNotNull();
+        assertThat(second).isNotNull();
+        assertThat(second).isNotEqualTo(first);
     }
 
     @Test

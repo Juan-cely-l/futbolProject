@@ -46,6 +46,9 @@ info:
       - scenario: Concurrent sync rejection remains stable
         operations:
           - "POST /futbix/v1/sync -> 409"
+      - scenario: Executor rejection does not accept a sync
+        operations:
+          - "POST /futbix/v1/sync -> 503"
       - scenario: Sync progress contract remains stable
         operations:
           - "GET /futbix/v1/sync/{syncId} -> 200"
@@ -53,6 +56,14 @@ info:
         operations:
           - "GET /futbix/v1/sync/{syncId} -> 404"
       - scenario: League failure records partial progress
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200 PARTIAL"
+      - scenario: Multiple leagues complete successfully
+        operations:
+          - "POST /futbix/v1/sync -> 202"
+          - "GET /futbix/v1/sync/{syncId} -> 200"
+      - scenario: A later league fails after earlier progress
         operations:
           - "POST /futbix/v1/sync -> 202"
           - "GET /futbix/v1/sync/{syncId} -> 200 PARTIAL"
@@ -157,6 +168,19 @@ paths:
                     status: 409
                     error: Conflict
                     message: "A sync is already in progress. Wait for it to complete before starting another."
+        "503":
+          description: The sync scheduler temporarily rejected the job. Retry shortly.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                schedulerUnavailable:
+                  value:
+                    timestamp: "2026-07-31T10:15:30"
+                    status: 503
+                    error: Service Unavailable
+                    message: "Sync could not be started: the sync scheduler is temporarily unavailable. Retry shortly."
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "500":

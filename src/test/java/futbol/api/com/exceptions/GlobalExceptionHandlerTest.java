@@ -3,6 +3,7 @@ package futbol.api.com.exceptions;
 import futbol.api.com.exceptions.ExternalApiException;
 import futbol.api.com.exceptions.ResourceAlreadyExistsException;
 import futbol.api.com.exceptions.ResourceNotFoundException;
+import futbol.api.com.external.dto.SyncAdmissionRejectedException;
 import futbol.api.com.external.dto.SyncInProgressException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -140,6 +141,26 @@ class GlobalExceptionHandlerTest {
             ResponseEntity<Map<String, Object>> response = handler.handleSyncInProgress(exception);
 
             assertStandardErrorResponse(response, HttpStatus.CONFLICT, "Conflict", message);
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // 503 — SyncAdmissionRejectedException
+    // ----------------------------------------------------------------
+    @Nested
+    @DisplayName("SyncAdmissionRejectedException → 503")
+    class SyncAdmissionRejectedTests {
+
+        @Test
+        @DisplayName("should return 503 with retryable message and no syncId")
+        void handleSyncAdmissionRejected_returns503WithoutSyncId() {
+            String message = "Sync could not be started: the sync scheduler is temporarily unavailable. Retry shortly.";
+            SyncAdmissionRejectedException exception = new SyncAdmissionRejectedException(message);
+
+            ResponseEntity<Map<String, Object>> response = handler.handleSyncAdmissionRejected(exception);
+
+            assertStandardErrorResponse(response, HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", message);
+            assertThat(response.getBody()).doesNotContainKey("syncId");
         }
     }
 
@@ -494,6 +515,10 @@ class GlobalExceptionHandlerTest {
             SyncInProgressException ex3 = new SyncInProgressException("msg");
             ResponseEntity<Map<String, Object>> r3 = handler.handleSyncInProgress(ex3);
             assertThat(r3.getBody()).containsKey("timestamp");
+
+            SyncAdmissionRejectedException ex3b = new SyncAdmissionRejectedException("msg");
+            ResponseEntity<Map<String, Object>> r3b = handler.handleSyncAdmissionRejected(ex3b);
+            assertThat(r3b.getBody()).containsKey("timestamp");
 
             ExternalApiException ex4 = new ExternalApiException(429, "msg");
             ResponseEntity<Map<String, Object>> r4 = handler.handleExternalApi(ex4);
